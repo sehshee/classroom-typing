@@ -331,6 +331,119 @@
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+
+  /* ── LIVE BUBBLE SCREEN (선생님 게임 진행 화면) ── */
+  #screen-live {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .live-header {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 1.5rem;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    flex-wrap: wrap; gap: 0.8rem;
+  }
+  .live-question-box {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    text-align: center;
+    padding: 2rem 3rem;
+    max-width: 700px; width: 90%;
+    pointer-events: none;
+  }
+  .live-question-label {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--text2); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .live-question-text {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  }
+  .live-submit-count {
+    font-size: 0.9rem; color: var(--accent); font-weight: 700;
+  }
+  /* floating bubbles */
+  .float-bubble {
+    position: absolute;
+    padding: 12px 18px;
+    border-radius: 20px 20px 20px 4px;
+    border: 1.5px solid;
+    max-width: 240px;
+    min-width: 140px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    cursor: default;
+    z-index: 8;
+    animation: floatIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+    transition: transform 0.2s;
+  }
+  .float-bubble:hover { transform: scale(1.04) translateY(-2px); }
+  @keyframes floatIn {
+    from { transform: scale(0.4) translateY(20px); opacity: 0; }
+    to   { transform: scale(1)   translateY(0);    opacity: 1; }
+  }
+  .float-bubble .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
+  .float-bubble .bubble-text { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
+  .float-bubble .bubble-time { font-size: 0.7rem; opacity: 0.65; }
+
+  /* ── PASSWORD MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%; max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .modal-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.3rem; font-weight: 700; color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .modal-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 1rem; }
+  .btn-danger {
+    padding: 0.7rem 1.4rem;
+    background: #fee2e2; color: #dc2626;
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-danger:hover { background: #fecaca; }
+
+  /* ── RESET GAME BUTTON style ── */
+  .btn-reset-game {
+    padding: 0.7rem 1.4rem;
+    background: #fff7ed; color: #ea580c;
+    border: 1.5px solid #fdba74;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem; font-family: inherit;
+    cursor: pointer; transition: all .2s; font-weight: 700;
+  }
+  .btn-reset-game:hover { background: #ffedd5; }
 </style>
 </head>
 <body>
@@ -359,6 +472,7 @@
     <div class="top-title">👩‍🏫 선생님 대시보드</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <span class="badge" id="student-count-badge">학생 0명</span>
+      <button class="btn-secondary" onclick="openPwModal()">🔑 비밀번호 변경</button>
       <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
       <button class="btn-secondary" onclick="resetGame()" id="reset-btn" style="display:none">🔄 새 문제</button>
     </div>
@@ -383,21 +497,33 @@
     </div>
   </div>
 
-  <!-- 버블 영역 -->
-  <div class="panel" id="bubble-panel" style="display:none">
-    <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
-      <span>실시간 제출 현황</span>
-      <span id="submit-count" style="color:var(--accent);font-size:0.9rem;font-weight:700;"></span>
+  <!-- 버블 영역 — 이제 별도 screen-live로 이동, 여기선 숨김 -->
+  <div id="bubble-panel" style="display:none"></div>
+</div>
+
+<!-- ══════════ LIVE BUBBLE SCREEN (선생님 게임 진행) ══════════ -->
+<div id="screen-live" class="screen">
+  <div class="live-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="top-title">👩‍🏫 실시간 현황</div>
+      <div id="all-submitted-notice-live" style="display:none;padding:4px 14px;background:rgba(22,163,74,0.1);border:1px solid #16a34a;border-radius:99px;color:#15803d;font-size:0.82rem;font-weight:700;">
+        🎉 전원 제출 완료!
+      </div>
     </div>
-    <div id="teacher-prompt-display" style="margin-bottom:1rem;padding:0.8rem 1rem;background:#f7f8fa;border-radius:var(--radius-sm);font-size:0.95rem;color:var(--text2);border:1px solid rgba(0,0,0,0.06);"></div>
-    <div id="all-submitted-notice" style="display:none;margin-bottom:1rem;padding:0.9rem 1.2rem;background:rgba(22,163,74,0.08);border:1.5px solid #16a34a;border-radius:var(--radius-sm);color:#15803d;font-weight:700;font-size:0.95rem;text-align:center;">
-      🎉 전체 학생의 답안이 제출되었습니다!
-    </div>
-    <div class="bubbles-area" id="bubbles-area"></div>
-    <div class="flex-row mt">
-      <button class="btn-primary grow" onclick="showRoundResult()">📊 결과 보기</button>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span id="live-submit-count" class="live-submit-count">0명 제출</span>
+      <span class="badge" id="live-student-badge">학생 0명</span>
+      <button class="btn-primary" style="width:auto;padding:0.6rem 1.4rem;" onclick="showRoundResult()">📊 결과 보기</button>
     </div>
   </div>
+
+  <!-- 중앙 질문 표시 -->
+  <div class="live-question-box">
+    <div class="live-question-label" id="live-qtype-label"></div>
+    <div class="live-question-text" id="live-question-text"></div>
+  </div>
+
+  <!-- 떠다니는 버블들이 여기에 렌더링됨 (JS로 position:absolute) -->
 </div>
 
 <!-- ══════════ STUDENT ══════════ -->
@@ -467,9 +593,26 @@
   <div class="podium" id="final-podium"></div>
   <div class="rank-list" id="final-rank-list"></div>
   <div class="game-history" id="game-history"></div>
-  <div class="flex-row" style="justify-content:center;">
+  <div class="flex-row" style="justify-content:center;margin-bottom:2rem;">
     <button class="btn-secondary" onclick="goBackToResult()">← 돌아가기</button>
     <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none">새 게임 시작 ▶</button>
+    <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화 &amp; 새 게임</button>
+  </div>
+</div>
+
+<!-- ══════════ PASSWORD MODAL ══════════ -->
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal-card">
+    <div class="modal-title">🔑 비밀번호 변경</div>
+    <div class="modal-sub">선생님 입장 비밀번호를 변경합니다.<br>변경 후 저장됩니다.</div>
+    <input class="input-field" id="pw-current" type="password" placeholder="현재 비밀번호" />
+    <input class="input-field" id="pw-new" type="password" placeholder="새 비밀번호 (4자 이상)" />
+    <input class="input-field" id="pw-confirm" type="password" placeholder="새 비밀번호 확인" />
+    <div id="pw-error" class="small" style="color:#ff6b6b;min-height:18px;"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary grow" onclick="closePwModal()">취소</button>
+      <button class="btn-primary grow" onclick="changePassword()" style="width:auto;">변경하기</button>
+    </div>
   </div>
 </div>
 
@@ -500,6 +643,7 @@ let timerInterval = null;
 let startTime = null;
 let roundActive = false;
 let prevScreen = 'result';
+let renderedBubbleIds = new Set(); // 이미 렌더링된 버블 추적
 
 // BUBBLE COLORS (vivid, light-mode friendly)
 const BUBBLE_COLORS = [
@@ -546,6 +690,54 @@ window.selectQtype = function(qt) {
   document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
 };
 
+// ── PASSWORD MODAL ──
+window.openPwModal = function() {
+  document.getElementById('pw-current').value = '';
+  document.getElementById('pw-new').value = '';
+  document.getElementById('pw-confirm').value = '';
+  document.getElementById('pw-error').textContent = '';
+  document.getElementById('pw-modal').classList.add('open');
+};
+window.closePwModal = function() {
+  document.getElementById('pw-modal').classList.remove('open');
+};
+window.changePassword = async function() {
+  const cur = document.getElementById('pw-current').value;
+  const nw = document.getElementById('pw-new').value;
+  const cf = document.getElementById('pw-confirm').value;
+  const errEl = document.getElementById('pw-error');
+  errEl.textContent = '';
+
+  // 현재 비밀번호 확인 (Firebase에서)
+  const snap = await get(ref(db, 'room/teacherPassword'));
+  const storedPw = snap.val() || '1234';
+  if (cur !== storedPw) { errEl.textContent = '현재 비밀번호가 틀렸습니다.'; return; }
+  if (nw.length < 4) { errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.'; return; }
+  if (nw !== cf) { errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+
+  await set(ref(db, 'room/teacherPassword'), nw);
+  closePwModal();
+  alert('✅ 비밀번호가 변경되었습니다.');
+};
+
+// ── FULL RESET (전체 초기화) ──
+window.fullResetGame = async function() {
+  if (!confirm('⚠️ 모든 점수, 기록, 순위를 삭제하고 새 게임을 시작할까요?')) return;
+  await remove(ref(db, 'room/submissions'));
+  await remove(ref(db, 'room/roundResult'));
+  await remove(ref(db, 'room/history'));
+  await remove(ref(db, 'room/scores'));
+  // 학생 done 플래그 초기화
+  const snap = await get(ref(db, 'room/students'));
+  const students = snap.val() || {};
+  const updates = {};
+  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
+  await update(ref(db), updates);
+  await set(ref(db, 'room/round'), { state: 'idle' });
+  document.getElementById('question-text').value = '';
+  showScreen('teacher');
+};
+
 // ── ENTER ──
 window.enterRoom = async function() {
   const name = document.getElementById('lobby-name').value.trim();
@@ -554,12 +746,17 @@ window.enterRoom = async function() {
   if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
 
   if (myRole === 'teacher') {
-    const pw = document.getElementById('lobby-pw').value;
-    if (pw !== '1234' && pw !== '') {
-      // allow blank → default 1234
-    }
-    if (pw && pw !== '1234') { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
+    const pw = document.getElementById('lobby-pw').value || '1234';
+    // Firebase에 저장된 비밀번호 확인
+    const snap = await get(ref(db, 'room/teacherPassword'));
+    const storedPw = snap.val() || '1234';
+    if (pw !== storedPw) { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
+
     myName = name; myId = 'teacher';
+    // 선생님 재접속 시 모든 학생 정보 삭제
+    await remove(ref(db, 'room/students'));
+    await remove(ref(db, 'room/submissions'));
+    await set(ref(db, 'room/round'), { state: 'idle' });
     await set(ref(db, 'room/teacher'), { name, online: true });
     showScreen('teacher');
     listenAsTeacher();
@@ -579,7 +776,7 @@ window.enterRoom = async function() {
 
 // ── TEACHER LISTENERS ──
 function listenAsTeacher() {
-  // students
+  // students — 두 badge 모두 업데이트
   onValue(ref(db, 'room/students'), snap => {
     const students = snap.val() || {};
     const list = document.getElementById('students-list');
@@ -597,47 +794,77 @@ function listenAsTeacher() {
       list.appendChild(chip);
     });
     document.getElementById('student-count-badge').textContent = '학생 ' + count + '명';
-    // all-submitted notice
-    const notice = document.getElementById('all-submitted-notice');
-    if (notice) {
-      notice.style.display = (count > 0 && doneCount === count) ? 'block' : 'none';
+    document.getElementById('live-student-badge').textContent = '학생 ' + count + '명';
+    // all-submitted notice (live screen)
+    const noticeLive = document.getElementById('all-submitted-notice-live');
+    if (noticeLive) {
+      noticeLive.style.display = (count > 0 && doneCount === count) ? '' : 'none';
     }
   });
 
-  // submissions → bubbles
+  // submissions → 플로팅 버블 (새 제출만 추가)
   onValue(ref(db, 'room/submissions'), snap => {
     const subs = snap.val() || {};
-    const area = document.getElementById('bubbles-area');
-    area.innerHTML = '';
     const entries = Object.values(subs);
+    const liveScreen = document.getElementById('screen-live');
+    const liveCount = document.getElementById('live-submit-count');
+    if (liveCount) liveCount.textContent = entries.length + '명 제출';
+
+    // 이전 버블 모두 제거 후 전체 재렌더 (순서 유지)
+    liveScreen.querySelectorAll('.float-bubble').forEach(b => b.remove());
+    renderedBubbleIds.clear();
+
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    const headerH = 80;
+    const margin = 20;
+    const bw = 220, bh = 110;
+
     entries.forEach((sub, i) => {
+      if (renderedBubbleIds.has(sub.uid)) return;
+      renderedBubbleIds.add(sub.uid);
       const c = getColor(i);
       const div = document.createElement('div');
-      div.className = 'bubble';
-      div.style.cssText = `background:${c.bg};border-color:${c.border};color:${c.text};`;
-      div.innerHTML = `<div class="bubble-name">${sub.name}</div>
+      div.className = 'float-bubble';
+      div.style.background = c.bg;
+      div.style.borderColor = c.border;
+      div.style.color = c.text;
+
+      // 랜덤 위치 (헤더 아래, 화면 안)
+      const maxX = Math.max(screenW - bw - margin, margin);
+      const maxY = Math.max(screenH - bh - margin, headerH + margin);
+      const rx = margin + Math.random() * (maxX - margin);
+      const ry = headerH + margin + Math.random() * (maxY - headerH - margin);
+      div.style.left = rx + 'px';
+      div.style.top  = ry + 'px';
+
+      div.innerHTML = `
+        <div class="bubble-name">${sub.name}</div>
         <div class="bubble-text">${sub.answer}</div>
-        <div class="bubble-time">⏱ ${fmtTime(sub.elapsed)}</div>`;
-      area.appendChild(div);
+        <div class="bubble-time">⏱ ${fmtTime(sub.elapsed)} · ${calcWPM(sub.answer, sub.elapsed)}타/분</div>`;
+      liveScreen.appendChild(div);
     });
-    document.getElementById('submit-count').textContent =
-      entries.length + '명 제출';
   });
 
-  // round state
+  // round state → live screen 전환
   onValue(ref(db, 'room/round'), snap => {
     const round = snap.val();
     if (!round) return;
     if (round.state === 'active') {
       document.getElementById('question-panel').style.display = 'none';
-      document.getElementById('bubble-panel').style.display = 'block';
       document.getElementById('reset-btn').style.display = '';
-      document.getElementById('teacher-prompt-display').textContent =
-        (round.qtype === 'copy' ? '📝 따라쓰기: ' : '💬 답변하기: ') + round.question;
+      // live question 표시
+      document.getElementById('live-qtype-label').textContent =
+        round.qtype === 'copy' ? '📝 따라쓰기' : '💬 답변하기';
+      document.getElementById('live-question-text').textContent = round.question;
+      showScreen('live');
     } else if (round.state === 'idle') {
       document.getElementById('question-panel').style.display = 'block';
-      document.getElementById('bubble-panel').style.display = 'none';
       document.getElementById('reset-btn').style.display = 'none';
+      // live 화면 버블 초기화
+      document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
+      renderedBubbleIds.clear();
+      showScreen('teacher');
     }
   });
 }
@@ -806,6 +1033,7 @@ window.showFinalResult = async function() {
 
   if (myRole === 'teacher') {
     document.getElementById('final-new-btn').style.display = '';
+    document.getElementById('full-reset-btn').style.display = '';
   }
   showScreen('final');
 };
@@ -819,7 +1047,16 @@ window.nextRound = async function() {
   await set(ref(db, 'room/round'), { state: 'idle' });
   await remove(ref(db, 'room/submissions'));
   await remove(ref(db, 'room/roundResult'));
+  // reset student done flags
+  const snap = await get(ref(db, 'room/students'));
+  const students = snap.val() || {};
+  const updates = {};
+  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
+  if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
+  // clear live bubbles
+  document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
+  renderedBubbleIds.clear();
   showScreen('teacher');
 };
 

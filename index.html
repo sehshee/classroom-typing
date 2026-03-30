@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>타자 교실</title>
+<title>타자 교실 v3.1 - 스마트 배치</title>
 <link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@300;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -143,32 +143,6 @@
     cursor: pointer; transition: all .2s;
   }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* BUBBLES */
-  .bubbles-area {
-    flex: 1; min-height: 280px;
-    display: flex; flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 14px; padding: 1rem;
-    background: #f7f8fa;
-    border: 1px solid rgba(0,0,0,0.07);
-    border-radius: var(--radius);
-    overflow-y: auto;
-  }
-  .bubble {
-    padding: 12px 18px;
-    border-radius: 20px 20px 20px 4px;
-    max-width: 220px;
-    border: 1.5px solid;
-    animation: bubblePop .4s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes bubblePop {
-    from { transform: scale(0.5); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
-  .bubble-text { font-size: 0.88rem; line-height: 1.4; margin-bottom: 6px; }
-  .bubble-time { font-size: 0.7rem; opacity: 0.65; }
 
   /* STUDENTS LIST */
   .students-list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -321,18 +295,7 @@
   }
   .history-item strong { color: var(--text); }
 
-  /* UTIL */
-  .flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .grow { flex: 1; }
-  .hidden { display: none !important; }
-  .mt { margin-top: 1rem; }
-  .center { text-align: center; }
-  .small { font-size: 0.82rem; color: var(--text2); }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
-
-  /* ── LIVE BUBBLE SCREEN (선생님 게임 진행 화면) ── */
+  /* ── LIVE BUBBLE SCREEN ── */
   #screen-live {
     min-height: 100vh;
     position: relative;
@@ -340,7 +303,7 @@
     background: var(--bg);
   }
   .live-header {
-    position: relative; z-index: 10;
+    position: relative; z-index: 20;
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.2rem 1.5rem;
     background: rgba(255,255,255,0.85);
@@ -357,6 +320,9 @@
     padding: 2rem 3rem;
     max-width: 700px; width: 90%;
     pointer-events: none;
+    /* 영역 확인을 위한 투명 배경 */
+    background: rgba(255,255,255,0.4);
+    border-radius: 30px;
   }
   .live-question-label {
     font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
@@ -368,12 +334,7 @@
     font-weight: 700;
     color: var(--text);
     line-height: 1.35;
-    text-shadow: 0 2px 20px rgba(0,0,0,0.08);
   }
-  .live-submit-count {
-    font-size: 0.9rem; color: var(--accent); font-weight: 700;
-  }
-  /* floating bubbles */
   .float-bubble {
     position: absolute;
     padding: 12px 18px;
@@ -382,19 +343,17 @@
     max-width: 240px;
     min-width: 140px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    cursor: default;
-    z-index: 8;
+    z-index: 10;
     animation: floatIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
     transition: transform 0.2s;
   }
-  .float-bubble:hover { transform: scale(1.04) translateY(-2px); }
   @keyframes floatIn {
     from { transform: scale(0.4) translateY(20px); opacity: 0; }
     to   { transform: scale(1)   translateY(0);    opacity: 1; }
   }
-  .float-bubble .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
-  .float-bubble .bubble-text { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
-  .float-bubble .bubble-time { font-size: 0.7rem; opacity: 0.65; }
+  .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
+  .bubble-text { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
+  .bubble-time { font-size: 0.7rem; opacity: 0.65; }
 
   /* ── PASSWORD MODAL ── */
   .modal-overlay {
@@ -411,30 +370,15 @@
     padding: 2.5rem;
     width: 100%; max-width: 380px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
   }
-  @keyframes modalIn {
-    from { transform: scale(0.85); opacity: 0; }
-    to   { transform: scale(1);    opacity: 1; }
-  }
-  .modal-title {
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.3rem; font-weight: 700; color: var(--text);
-    margin-bottom: 0.4rem;
-  }
-  .modal-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
-  .modal-btns { display: flex; gap: 10px; margin-top: 1rem; }
-  .btn-danger {
-    padding: 0.7rem 1.4rem;
-    background: #fee2e2; color: #dc2626;
-    border: 1.5px solid #fca5a5;
-    border-radius: var(--radius-sm);
-    font-size: 0.9rem; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-  }
-  .btn-danger:hover { background: #fecaca; }
 
-  /* ── RESET GAME BUTTON style ── */
+  /* UTIL */
+  .flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .grow { flex: 1; }
+  .hidden { display: none !important; }
+  .mt { margin-top: 1rem; }
+  .center { text-align: center; }
+  .small { font-size: 0.82rem; color: var(--text2); }
   .btn-reset-game {
     padding: 0.7rem 1.4rem;
     background: #fff7ed; color: #ea580c;
@@ -443,12 +387,10 @@
     font-size: 0.88rem; font-family: inherit;
     cursor: pointer; transition: all .2s; font-weight: 700;
   }
-  .btn-reset-game:hover { background: #ffedd5; }
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOBBY ══════════ -->
 <div id="screen-lobby" class="screen active">
   <div class="lobby-card">
     <div class="lobby-title">⌨️ 타자 교실</div>
@@ -466,7 +408,6 @@
   </div>
 </div>
 
-<!-- ══════════ TEACHER ══════════ -->
 <div id="screen-teacher" class="screen">
   <div class="top-bar">
     <div class="top-title">👩‍🏫 선생님 대시보드</div>
@@ -477,14 +418,10 @@
       <button class="btn-secondary" onclick="resetGame()" id="reset-btn" style="display:none">🔄 새 문제</button>
     </div>
   </div>
-
-  <!-- 학생 현황 -->
   <div class="panel">
     <div class="panel-title">접속 중인 학생</div>
     <div class="students-list" id="students-list"></div>
   </div>
-
-  <!-- 출제 패널 -->
   <div class="panel" id="question-panel">
     <div class="panel-title">문제 출제</div>
     <div class="question-type-btns">
@@ -496,12 +433,8 @@
       <button class="btn-primary grow" onclick="startRound()">▶ 게임 시작</button>
     </div>
   </div>
-
-  <!-- 버블 영역 — 이제 별도 screen-live로 이동, 여기선 숨김 -->
-  <div id="bubble-panel" style="display:none"></div>
 </div>
 
-<!-- ══════════ LIVE BUBBLE SCREEN (선생님 게임 진행) ══════════ -->
 <div id="screen-live" class="screen">
   <div class="live-header">
     <div style="display:flex;align-items:center;gap:12px;">
@@ -516,110 +449,77 @@
       <button class="btn-primary" style="width:auto;padding:0.6rem 1.4rem;" onclick="showRoundResult()">📊 결과 보기</button>
     </div>
   </div>
-
-  <!-- 중앙 질문 표시 -->
-  <div class="live-question-box">
+  <div class="live-question-box" id="live-question-box">
     <div class="live-question-label" id="live-qtype-label"></div>
     <div class="live-question-text" id="live-question-text"></div>
   </div>
-
-  <!-- 떠다니는 버블들이 여기에 렌더링됨 (JS로 position:absolute) -->
 </div>
 
-<!-- ══════════ STUDENT ══════════ -->
 <div id="screen-student" class="screen">
   <div class="student-card">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.1rem;font-weight:700;">⌨️ 타자 교실</div>
       <span class="badge" id="student-name-badge"></span>
     </div>
-
-    <div id="student-waiting" class="waiting-msg">
-      선생님의 문제를 기다리는 중<span class="waiting-dot">...</span>
-    </div>
-
+    <div id="student-waiting" class="waiting-msg">선생님의 문제를 기다리는 중<span class="waiting-dot">...</span></div>
     <div id="student-game" class="hidden">
       <div class="small" id="game-type-label" style="margin-bottom:0.5rem;"></div>
       <div class="prompt-box" id="student-prompt"></div>
       <div class="status-bar">
         <div class="timer" id="student-timer">0.0s</div>
         <div class="wpm-badge" id="wpm-display">-- 타/분</div>
-        <div class="wpm-badge" id="char-count">0자</div>
       </div>
-      <textarea class="typing-input" id="typing-input"
-        placeholder="여기에 입력하세요..."
-        oninput="onTypingInput()"
-        onkeydown="onTypingKeydown(event)"></textarea>
+      <textarea class="typing-input" id="typing-input" placeholder="여기에 입력하세요..." oninput="onTypingInput()" onkeydown="onTypingKeydown(event)"></textarea>
       <div id="error-msg" class="small" style="color:#ff6b6b;min-height:18px;"></div>
       <button class="btn-primary" id="submit-btn" onclick="submitAnswer()">제출하기 ↵</button>
     </div>
-
-    <div id="student-done" class="hidden waiting-msg">
-      ✅ 제출 완료! 다른 친구들을 기다리는 중<span class="waiting-dot">...</span>
-    </div>
-
-    <!-- 학생 결과 화면 -->
+    <div id="student-done" class="hidden waiting-msg">✅ 제출 완료! 다른 친구들을 기다리는 중<span class="waiting-dot">...</span></div>
     <div id="student-result" class="hidden" style="display:none;flex-direction:column;gap:1rem;">
       <div id="student-congrats" style="display:none;text-align:center;padding:1.2rem;border-radius:var(--radius);font-family:'Gmarket Sans',sans-serif;font-size:1.5rem;font-weight:700;"></div>
       <div id="my-rank-highlight" style="text-align:center;padding:1.5rem;background:#f7f8fa;border-radius:var(--radius);border:2px solid var(--accent);">
-        <div style="font-size:0.82rem;color:var(--text2);margin-bottom:0.3rem;">내 순위</div>
         <div id="my-rank-num" style="font-family:'Gmarket Sans',sans-serif;font-size:3rem;font-weight:700;color:var(--accent);"></div>
         <div id="my-rank-time" style="font-size:1rem;color:var(--text2);margin-top:0.2rem;"></div>
-        <div id="my-rank-wpm" style="font-size:0.88rem;color:var(--text2);margin-top:0.1rem;"></div>
       </div>
-      <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-top:0.5rem;">전체 순위</div>
-      <div id="student-rank-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div id="student-rank-list"></div>
     </div>
-
-  </div><!-- end student-card -->
-</div><!-- end screen-student -->
-
-<!-- ══════════ RESULT (ROUND) ══════════ -->
-<div id="screen-result" class="screen">
-  <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;">
-    🏅 라운드 결과
   </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;margin-top:2rem;">🏅 라운드 결과</div>
   <div class="podium" id="podium"></div>
   <div class="rank-list" id="rank-list"></div>
-  <div class="flex-row" style="justify-content:center;gap:12px;" id="result-btns">
-    <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
+  <div class="flex-row" style="justify-content:center;gap:12px;margin-bottom:2rem;">
     <button class="btn-primary" id="next-round-btn" onclick="nextRound()" style="display:none">다음 문제 ▶</button>
   </div>
 </div>
 
-<!-- ══════════ FINAL RESULT ══════════ -->
 <div id="screen-final" class="screen">
-  <div class="final-title">🏆 최종 순위</div>
+  <div class="final-title" style="margin-top:2rem;">🏆 최종 순위</div>
   <div class="podium" id="final-podium"></div>
   <div class="rank-list" id="final-rank-list"></div>
-  <div class="game-history" id="game-history"></div>
   <div class="flex-row" style="justify-content:center;margin-bottom:2rem;">
-    <button class="btn-secondary" onclick="goBackToResult()">← 돌아가기</button>
-    <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none">새 게임 시작 ▶</button>
-    <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화 &amp; 새 게임</button>
+    <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화 & 새 게임</button>
   </div>
 </div>
 
-<!-- ══════════ PASSWORD MODAL ══════════ -->
 <div class="modal-overlay" id="pw-modal">
   <div class="modal-card">
     <div class="modal-title">🔑 비밀번호 변경</div>
-    <div class="modal-sub">선생님 입장 비밀번호를 변경합니다.<br>변경 후 저장됩니다.</div>
     <input class="input-field" id="pw-current" type="password" placeholder="현재 비밀번호" />
-    <input class="input-field" id="pw-new" type="password" placeholder="새 비밀번호 (4자 이상)" />
-    <input class="input-field" id="pw-confirm" type="password" placeholder="새 비밀번호 확인" />
-    <div id="pw-error" class="small" style="color:#ff6b6b;min-height:18px;"></div>
-    <div class="modal-btns">
+    <input class="input-field" id="pw-new" type="password" placeholder="새 비밀번호" />
+    <input class="input-field" id="pw-confirm" type="password" placeholder="비밀번호 확인" />
+    <div id="pw-error" class="small" style="color:#ff6b6b;"></div>
+    <div class="modal-btns flex-row">
       <button class="btn-secondary grow" onclick="closePwModal()">취소</button>
-      <button class="btn-primary grow" onclick="changePassword()" style="width:auto;">변경하기</button>
+      <button class="btn-primary grow" onclick="changePassword()">변경</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, update, remove, off }
+import { getDatabase, ref, set, get, push, onValue, update, remove }
   from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -639,24 +539,16 @@ let myRole = 'student';
 let myName = '';
 let myId = '';
 let currentQtype = 'copy';
-let timerInterval = null;
 let startTime = null;
 let roundActive = false;
-let prevScreen = 'result';
-let renderedBubbleIds = new Set(); // 이미 렌더링된 버블 추적
+let placedRects = []; // 말풍선 위치 저장 (충돌 방지용)
 
-// BUBBLE COLORS (vivid, light-mode friendly)
 const BUBBLE_COLORS = [
-  { bg: 'rgba(233,69,96,0.10)',  border: '#e94560', text: '#c0283e' },
-  { bg: 'rgba(37,99,235,0.10)',  border: '#2563eb', text: '#1d4ed8' },
-  { bg: 'rgba(22,163,74,0.10)',  border: '#16a34a', text: '#15803d' },
-  { bg: 'rgba(234,88,12,0.10)',  border: '#ea580c', text: '#c2410c' },
-  { bg: 'rgba(124,58,237,0.10)', border: '#7c3aed', text: '#6d28d9' },
-  { bg: 'rgba(219,39,119,0.10)', border: '#db2777', text: '#be185d' },
-  { bg: 'rgba(202,138,4,0.10)',  border: '#ca8a04', text: '#a16207' },
-  { bg: 'rgba(6,182,212,0.10)',  border: '#06b6d4', text: '#0e7490' },
-  { bg: 'rgba(239,68,68,0.10)',  border: '#ef4444', text: '#dc2626' },
-  { bg: 'rgba(16,185,129,0.10)', border: '#10b981', text: '#059669' },
+  { bg: 'rgba(233,69,96,0.1)', border: '#e94560', text: '#c0283e' },
+  { bg: 'rgba(37,99,235,0.1)', border: '#2563eb', text: '#1d4ed8' },
+  { bg: 'rgba(22,163,74,0.1)', border: '#16a34a', text: '#15803d' },
+  { bg: 'rgba(234,88,12,0.1)', border: '#ea580c', text: '#c2410c' },
+  { bg: 'rgba(124,58,237,0.1)', border: '#7c3aed', text: '#6d28d9' }
 ];
 function getColor(idx) { return BUBBLE_COLORS[idx % BUBBLE_COLORS.length]; }
 
@@ -665,590 +557,225 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
 }
-function fmtTime(ms) {
-  if (ms < 60000) return (ms/1000).toFixed(2) + 's';
-  return Math.floor(ms/60000) + 'm ' + ((ms%60000)/1000).toFixed(1) + 's';
-}
+function fmtTime(ms) { return (ms/1000).toFixed(2) + 's'; }
 function calcWPM(text, ms) {
   const words = text.length / 5;
   const mins = ms / 60000;
   return mins > 0 ? Math.round(words / mins) : 0;
 }
 
-// ── ROLE SELECT ──
+// ── ROLE & QTYPE ──
 window.selectRole = function(role) {
   myRole = role;
   document.getElementById('role-student').classList.toggle('selected', role === 'student');
   document.getElementById('role-teacher').classList.toggle('selected', role === 'teacher');
   document.getElementById('teacher-pw-wrap').classList.toggle('hidden', role !== 'teacher');
 };
-
-// ── QTYPE ──
 window.selectQtype = function(qt) {
   currentQtype = qt;
   document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
   document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
 };
 
-// ── PASSWORD MODAL ──
-window.openPwModal = function() {
-  document.getElementById('pw-current').value = '';
-  document.getElementById('pw-new').value = '';
-  document.getElementById('pw-confirm').value = '';
-  document.getElementById('pw-error').textContent = '';
-  document.getElementById('pw-modal').classList.add('open');
-};
-window.closePwModal = function() {
-  document.getElementById('pw-modal').classList.remove('open');
-};
-window.changePassword = async function() {
-  const cur = document.getElementById('pw-current').value;
-  const nw = document.getElementById('pw-new').value;
-  const cf = document.getElementById('pw-confirm').value;
-  const errEl = document.getElementById('pw-error');
-  errEl.textContent = '';
-
-  // 현재 비밀번호 확인 (Firebase에서)
-  const snap = await get(ref(db, 'room/teacherPassword'));
-  const storedPw = snap.val() || '1234';
-  if (cur !== storedPw) { errEl.textContent = '현재 비밀번호가 틀렸습니다.'; return; }
-  if (nw.length < 4) { errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.'; return; }
-  if (nw !== cf) { errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
-
-  await set(ref(db, 'room/teacherPassword'), nw);
-  closePwModal();
-  alert('✅ 비밀번호가 변경되었습니다.');
-};
-
-// ── FULL RESET (전체 초기화) ──
-window.fullResetGame = async function() {
-  if (!confirm('⚠️ 모든 점수, 기록, 순위를 삭제하고 새 게임을 시작할까요?')) return;
-  await remove(ref(db, 'room/submissions'));
-  await remove(ref(db, 'room/roundResult'));
-  await remove(ref(db, 'room/history'));
-  await remove(ref(db, 'room/scores'));
-  // 학생 done 플래그 초기화
-  const snap = await get(ref(db, 'room/students'));
-  const students = snap.val() || {};
-  const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
-  await update(ref(db), updates);
-  await set(ref(db, 'room/round'), { state: 'idle' });
-  document.getElementById('question-text').value = '';
-  showScreen('teacher');
-};
-
-// ── ENTER ──
+// ── ENTER ROOM ──
 window.enterRoom = async function() {
   const name = document.getElementById('lobby-name').value.trim();
-  const errEl = document.getElementById('lobby-error');
-  errEl.textContent = '';
-  if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
-
+  if (!name) return;
   if (myRole === 'teacher') {
     const pw = document.getElementById('lobby-pw').value || '1234';
-    // Firebase에 저장된 비밀번호 확인
     const snap = await get(ref(db, 'room/teacherPassword'));
-    const storedPw = snap.val() || '1234';
-    if (pw !== storedPw) { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
-
+    if (pw !== (snap.val() || '1234')) { alert('비밀번호 오류'); return; }
     myName = name; myId = 'teacher';
-    // 선생님 재접속 시 모든 학생 정보 삭제
-    await remove(ref(db, 'room/students'));
-    await remove(ref(db, 'room/submissions'));
     await set(ref(db, 'room/round'), { state: 'idle' });
-    await set(ref(db, 'room/teacher'), { name, online: true });
     showScreen('teacher');
     listenAsTeacher();
   } else {
     myName = name;
-    myId = 'student_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    myId = 'student_' + Date.now();
     await set(ref(db, 'room/students/' + myId), { name, online: true, done: false });
     showScreen('student');
     document.getElementById('student-name-badge').textContent = name;
     listenAsStudent();
-    // cleanup on unload
-    window.addEventListener('beforeunload', () => {
-      remove(ref(db, 'room/students/' + myId));
-    });
   }
 };
 
-// ── TEACHER LISTENERS ──
+// ── TEACHER LISTENERS (수정 핵심 로직) ──
 function listenAsTeacher() {
-  // students — 두 badge 모두 업데이트
   onValue(ref(db, 'room/students'), snap => {
     const students = snap.val() || {};
     const list = document.getElementById('students-list');
     list.innerHTML = '';
-    let count = 0;
-    let doneCount = 0;
+    let count = 0, doneCount = 0;
     Object.entries(students).forEach(([id, s]) => {
-      if (!s.online) return;
-      count++;
-      if (s.done) doneCount++;
+      count++; if (s.done) doneCount++;
       const chip = document.createElement('div');
       chip.className = 'student-chip' + (s.done ? ' done' : '');
-      chip.textContent = s.done ? '✓ ' + s.name : s.name;
-      chip.id = 'chip-' + id;
+      chip.textContent = (s.done ? '✓ ' : '') + s.name;
       list.appendChild(chip);
     });
     document.getElementById('student-count-badge').textContent = '학생 ' + count + '명';
     document.getElementById('live-student-badge').textContent = '학생 ' + count + '명';
-    // all-submitted notice (live screen)
-    const noticeLive = document.getElementById('all-submitted-notice-live');
-    if (noticeLive) {
-      noticeLive.style.display = (count > 0 && doneCount === count) ? '' : 'none';
-    }
+    const notice = document.getElementById('all-submitted-notice-live');
+    if (notice) notice.style.display = (count > 0 && doneCount === count) ? 'block' : 'none';
   });
 
-  // submissions → 플로팅 버블 (새 제출만 추가)
+  // 제출 시 말풍선 생성 (겹침 방지 적용)
   onValue(ref(db, 'room/submissions'), snap => {
     const subs = snap.val() || {};
-    const entries = Object.values(subs);
+    const entries = Object.entries(subs);
     const liveScreen = document.getElementById('screen-live');
-    const liveCount = document.getElementById('live-submit-count');
-    if (liveCount) liveCount.textContent = entries.length + '명 제출';
-
-    // 이전 버블 모두 제거 후 전체 재렌더 (순서 유지)
-    liveScreen.querySelectorAll('.float-bubble').forEach(b => b.remove());
-    renderedBubbleIds.clear();
+    document.getElementById('live-submit-count').textContent = entries.length + '명 제출';
 
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
-    const headerH = 80;
+    const bw = 240, bh = 110; // 말풍선 고정 크기
     const margin = 20;
-    const bw = 220, bh = 110;
 
-    entries.forEach((sub, i) => {
-      if (renderedBubbleIds.has(sub.uid)) return;
-      renderedBubbleIds.add(sub.uid);
-      const c = getColor(i);
-      const div = document.createElement('div');
-      div.className = 'float-bubble';
-      div.style.background = c.bg;
-      div.style.borderColor = c.border;
-      div.style.color = c.text;
+    // 중앙 금지 구역 (문제 박스 보호)
+    const protectW = 750, protectH = 300;
+    const pX1 = (screenW - protectW) / 2, pX2 = pX1 + protectW;
+    const pY1 = (screenH - protectH) / 2, pY2 = pY1 + protectH;
 
-      // 랜덤 위치 (헤더 아래, 화면 안)
-      const maxX = Math.max(screenW - bw - margin, margin);
-      const maxY = Math.max(screenH - bh - margin, headerH + margin);
-      const rx = margin + Math.random() * (maxX - margin);
-      const ry = headerH + margin + Math.random() * (maxY - headerH - margin);
-      div.style.left = rx + 'px';
-      div.style.top  = ry + 'px';
+    entries.forEach(([uid, sub], i) => {
+      let div = document.getElementById('bubble-' + uid);
+      if (!div) {
+        div = document.createElement('div');
+        div.id = 'bubble-' + uid;
+        div.className = 'float-bubble';
+        const c = getColor(i);
+        div.style.background = c.bg;
+        div.style.borderColor = c.border;
+        div.style.color = c.text;
 
-      div.innerHTML = `
-        <div class="bubble-name">${sub.name}</div>
-        <div class="bubble-text">${sub.answer}</div>
-        <div class="bubble-time">⏱ ${fmtTime(sub.elapsed)} · ${calcWPM(sub.answer, sub.elapsed)}타/분</div>`;
-      liveScreen.appendChild(div);
+        let rx, ry, attempts = 0;
+        let isOverlapping = true;
+
+        while (isOverlapping && attempts < 100) {
+          rx = margin + Math.random() * (screenW - bw - margin * 2);
+          ry = 100 + margin + Math.random() * (screenH - bh - 100 - margin * 2);
+
+          const newR = { x1: rx, y1: ry, x2: rx + bw, y2: ry + bh };
+          const overlapCenter = !(newR.x2 < pX1 || newR.x1 > pX2 || newR.y2 < pY1 || newR.y1 > pY2);
+          const overlapOthers = placedRects.some(r => !(newR.x2 < r.x1 || newR.x1 > r.x2 || newR.y2 < r.y1 || newR.y1 > r.y2));
+
+          if (!overlapCenter && !overlapOthers) isOverlapping = false;
+          attempts++;
+        }
+
+        div.style.left = rx + 'px';
+        div.style.top = ry + 'px';
+        div.innerHTML = `<div class="bubble-name">${sub.name}</div><div class="bubble-text">${sub.answer}</div><div class="bubble-time">${fmtTime(sub.elapsed)}</div>`;
+        liveScreen.appendChild(div);
+        placedRects.push({ x1: rx, y1: ry, x2: rx + bw, y2: ry + bh });
+      }
     });
   });
 
-  // round state → live screen 전환
   onValue(ref(db, 'room/round'), snap => {
     const round = snap.val();
-    if (!round) return;
-    if (round.state === 'active') {
-      document.getElementById('question-panel').style.display = 'none';
-      document.getElementById('reset-btn').style.display = '';
-      // live question 표시
-      document.getElementById('live-qtype-label').textContent =
-        round.qtype === 'copy' ? '📝 따라쓰기' : '💬 답변하기';
+    if (round?.state === 'active') {
+      document.getElementById('live-qtype-label').textContent = round.qtype === 'copy' ? '📝 따라쓰기' : '💬 답변하기';
       document.getElementById('live-question-text').textContent = round.question;
+      placedRects = []; // 새 라운드 시 위치 초기화
       showScreen('live');
-    } else if (round.state === 'idle') {
-      document.getElementById('question-panel').style.display = 'block';
-      document.getElementById('reset-btn').style.display = 'none';
-      // live 화면 버블 초기화
-      document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
-      renderedBubbleIds.clear();
+    } else if (round?.state === 'idle') {
+      document.querySelectorAll('.float-bubble').forEach(b => b.remove());
       showScreen('teacher');
     }
   });
 }
 
-// ── START ROUND ──
+// ── ROUND MANAGEMENT ──
 window.startRound = async function() {
   const q = document.getElementById('question-text').value.trim();
-  if (!q) { alert('문제를 입력해주세요!'); return; }
-  // clear prev
+  if (!q) return;
   await remove(ref(db, 'room/submissions'));
   await remove(ref(db, 'room/roundResult'));
-  // reset student done flags
-  const snap = await get(ref(db, 'room/students'));
-  const students = snap.val() || {};
-  const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
-  await update(ref(db), updates);
-  // set round
-  await set(ref(db, 'room/round'), {
-    question: q, qtype: currentQtype,
-    state: 'active', startedAt: Date.now()
-  });
+  const sSnap = await get(ref(db, 'room/students'));
+  const ups = {};
+  if (sSnap.val()) Object.keys(sSnap.val()).forEach(id => ups[`room/students/${id}/done`] = false);
+  await update(ref(db), ups);
+  await set(ref(db, 'room/round'), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
 };
 
-// ── SHOW ROUND RESULT ──
 window.showRoundResult = async function() {
   const snap = await get(ref(db, 'room/submissions'));
   const subs = snap.val() || {};
-  const roundSnap = await get(ref(db, 'room/round'));
-  const round = roundSnap.val() || {};
   const entries = Object.values(subs).sort((a,b) => a.elapsed - b.elapsed);
-  renderResult(entries, round.qtype);
-  // save to history
-  const historyEntry = { question: round.question, qtype: round.qtype, entries };
-  push(ref(db, 'room/history'), historyEntry);
-  // update cumulative scores
-  entries.forEach((e, i) => {
-    const pts = Math.max(10 - i, 1);
-    const scoreRef = ref(db, 'room/scores/' + e.uid);
-    get(scoreRef).then(s => {
-      const prev = s.val() || { name: e.name, points: 0, rounds: 0 };
-      set(scoreRef, { name: e.name, points: prev.points + pts, rounds: prev.rounds + 1 });
-    });
-  });
-  // push result to Firebase so students can see their ranking
-  await set(ref(db, 'room/roundResult'), { entries, qtype: round.qtype, publishedAt: Date.now() });
+  await set(ref(db, 'room/roundResult'), { entries, publishedAt: Date.now() });
+  renderResultList(entries);
   showScreen('result');
-  prevScreen = 'result';
-  document.getElementById('next-round-btn').style.display = '';
+  document.getElementById('next-round-btn').style.display = 'block';
 };
 
-function renderResult(entries, qtype) {
-  // podium
-  const podiumEl = document.getElementById('podium');
-  podiumEl.innerHTML = '';
-  const podiumOrder = [1, 0, 2]; // 2nd, 1st, 3rd
-  const heights = [90, 130, 70];
-  const colors = [
-    { bg: '#c0c0c0', border: '#a8a8a8', text: '#000' },
-    { bg: '#ffd700', border: '#e6c200', text: '#000' },
-    { bg: '#cd7f32', border: '#b56a20', text: '#fff' },
-  ];
-  const medals = ['🥇','🥈','🥉'];
-  podiumOrder.forEach((rankIdx, pos) => {
-    const e = entries[rankIdx];
-    if (!e) return;
-    const c = colors[rankIdx];
-    const item = document.createElement('div');
-    item.className = 'podium-item';
-    item.innerHTML = `
-      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
-        ${medals[rankIdx]}
-      </div>
-      <div class="podium-name">${e.name}</div>
-      <div class="podium-time">${fmtTime(e.elapsed)}</div>
-      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
-        ${rankIdx + 1}
-      </div>`;
-    podiumEl.appendChild(item);
-  });
-
-  // list
-  const listEl = document.getElementById('rank-list');
-  listEl.innerHTML = '';
+function renderResultList(entries) {
+  const list = document.getElementById('rank-list');
+  list.innerHTML = '';
   entries.forEach((e, i) => {
     const item = document.createElement('div');
     item.className = 'rank-item';
-    item.style.animationDelay = (i * 0.06) + 's';
-    const wpm = calcWPM(e.answer, e.elapsed);
-    const accurate = qtype === 'copy' ? (e.correct ? '✓ 정확' : '✗ 오류') : '–';
-    item.innerHTML = `
-      <div class="rank-num ${i<3?'r'+(i+1):''}">${i+1}</div>
-      <div class="rank-name">${e.name}</div>
-      <div class="rank-score">${qtype==='copy'?accurate:''}</div>
-      <div class="rank-time">${fmtTime(e.elapsed)} · ${wpm}타/분</div>`;
-    listEl.appendChild(item);
+    item.innerHTML = `<div class="rank-num">${i+1}</div><div class="rank-name">${e.name}</div><div class="rank-time">${fmtTime(e.elapsed)}</div>`;
+    list.appendChild(item);
   });
 }
 
-// ── SHOW FINAL RESULT ──
-window.showFinalResult = async function() {
-  const [scoresSnap, histSnap] = await Promise.all([
-    get(ref(db, 'room/scores')),
-    get(ref(db, 'room/history'))
-  ]);
-  const scores = scoresSnap.val() || {};
-  const history = histSnap.val() || {};
-
-  const sorted = Object.values(scores).sort((a,b) => b.points - a.points);
-
-  // podium
-  const podiumEl = document.getElementById('final-podium');
-  podiumEl.innerHTML = '';
-  const podiumOrder = [1, 0, 2];
-  const heights = [90, 130, 70];
-  const pColors = [
-    { bg: '#c0c0c0', border: '#a8a8a8', text: '#000' },
-    { bg: '#ffd700', border: '#e6c200', text: '#000' },
-    { bg: '#cd7f32', border: '#b56a20', text: '#fff' },
-  ];
-  const medals = ['🥇','🥈','🥉'];
-  podiumOrder.forEach((rankIdx, pos) => {
-    const e = sorted[rankIdx];
-    if (!e) return;
-    const c = pColors[rankIdx];
-    const item = document.createElement('div');
-    item.className = 'podium-item';
-    item.innerHTML = `
-      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
-        ${medals[rankIdx]}
-      </div>
-      <div class="podium-name">${e.name}</div>
-      <div class="podium-time">${e.points}점 · ${e.rounds}라운드</div>
-      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
-        ${rankIdx + 1}
-      </div>`;
-    podiumEl.appendChild(item);
-  });
-
-  // rank list
-  const listEl = document.getElementById('final-rank-list');
-  listEl.innerHTML = '';
-  sorted.forEach((e, i) => {
-    const item = document.createElement('div');
-    item.className = 'rank-item';
-    item.style.animationDelay = (i * 0.06) + 's';
-    item.innerHTML = `
-      <div class="rank-num ${i<3?'r'+(i+1):''}">${i+1}</div>
-      <div class="rank-name">${e.name}</div>
-      <div class="rank-score">${e.rounds}라운드 참여</div>
-      <div class="rank-time">${e.points}점</div>`;
-    listEl.appendChild(item);
-  });
-
-  // history
-  const histEl = document.getElementById('game-history');
-  histEl.innerHTML = '<div class="panel-title" style="margin-bottom:0.8rem;">게임 기록</div>';
-  Object.values(history).forEach((h, i) => {
-    const top = h.entries && h.entries[0];
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.innerHTML = `<strong>라운드 ${i+1}</strong> [${h.qtype==='copy'?'따라쓰기':'답변하기'}] "${h.question.slice(0,30)}${h.question.length>30?'…':''}"
-      ${top ? ` → 1위: <strong>${top.name}</strong> (${fmtTime(top.elapsed)})` : ''}`;
-    histEl.appendChild(div);
-  });
-
-  if (myRole === 'teacher') {
-    document.getElementById('final-new-btn').style.display = '';
-    document.getElementById('full-reset-btn').style.display = '';
-  }
-  showScreen('final');
-};
-
-window.goBackToResult = function() {
-  showScreen(prevScreen);
-};
-
-// ── NEXT ROUND ──
 window.nextRound = async function() {
   await set(ref(db, 'room/round'), { state: 'idle' });
-  await remove(ref(db, 'room/submissions'));
-  await remove(ref(db, 'room/roundResult'));
-  // reset student done flags
-  const snap = await get(ref(db, 'room/students'));
-  const students = snap.val() || {};
-  const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
-  if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
-  // clear live bubbles
-  document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
-  renderedBubbleIds.clear();
-  showScreen('teacher');
 };
-
-window.resetGame = window.nextRound;
 
 // ── STUDENT LISTENERS ──
 function listenAsStudent() {
   onValue(ref(db, 'room/round'), snap => {
-    const round = snap.val();
-    if (!round || round.state !== 'active') {
-      // reset to waiting when new round starts or idle
-      if (!round || round.state === 'idle') {
-        document.getElementById('student-waiting').classList.remove('hidden');
-        document.getElementById('student-game').classList.add('hidden');
-        document.getElementById('student-done').classList.add('hidden');
-        const sr = document.getElementById('student-result');
-        sr.classList.add('hidden'); sr.style.display = 'none';
-        stopTimer();
-        roundActive = false;
-      }
-      return;
-    }
-    // new round
-    if (!roundActive) {
+    const r = snap.val();
+    if (r?.state === 'active' && !roundActive) {
       roundActive = true;
-      document.getElementById('student-waiting').classList.add('hidden');
-      document.getElementById('student-done').classList.add('hidden');
-      const sr = document.getElementById('student-result');
-      sr.classList.add('hidden'); sr.style.display = 'none';
-      document.getElementById('student-game').classList.remove('hidden');
-      document.getElementById('student-prompt').textContent = round.question;
-      document.getElementById('game-type-label').textContent =
-        round.qtype === 'copy' ? '📝 따라쓰기 — 아래 문장을 그대로 입력하세요' : '💬 답변하기 — 자유롭게 답변하세요';
-      const inp = document.getElementById('typing-input');
-      inp.value = '';
-      inp.disabled = false;
-      inp.classList.remove('error');
-      document.getElementById('error-msg').textContent = '';
-      document.getElementById('submit-btn').disabled = false;
       startTime = Date.now();
-      startTimer();
+      document.getElementById('student-waiting').classList.add('hidden');
+      document.getElementById('student-game').classList.remove('hidden');
+      document.getElementById('student-prompt').textContent = r.question;
+      document.getElementById('typing-input').value = '';
+      document.getElementById('typing-input').disabled = false;
+    } else if (r?.state === 'idle') {
+      roundActive = false;
+      document.getElementById('student-waiting').classList.remove('hidden');
+      document.getElementById('student-game').classList.add('hidden');
+      document.getElementById('student-done').classList.add('hidden');
+      document.getElementById('student-result').style.display = 'none';
     }
   });
-
-  // listen for teacher publishing results
   onValue(ref(db, 'room/roundResult'), snap => {
-    const result = snap.val();
-    if (!result || !result.entries) return;
-    showStudentResult(result.entries, result.qtype);
+    const res = snap.val();
+    if (res) showStudentRank(res.entries);
   });
 }
 
-function showStudentResult(entries, qtype) {
-  document.getElementById('student-waiting').classList.add('hidden');
+function showStudentRank(entries) {
+  const myIdx = entries.findIndex(e => e.uid === myId);
+  if (myIdx === -1) return;
   document.getElementById('student-game').classList.add('hidden');
   document.getElementById('student-done').classList.add('hidden');
-
-  const sr = document.getElementById('student-result');
-  sr.classList.remove('hidden');
-  sr.style.display = 'flex';
-
-  // find my rank
-  const myIdx = entries.findIndex(e => e.uid === myId);
-  const myRank = myIdx + 1;
-  const myEntry = entries[myIdx];
-
-  // congrats for top 3
-  const congratsEl = document.getElementById('student-congrats');
-  if (myRank >= 1 && myRank <= 3 && myEntry) {
-    const medals = ['🥇', '🥈', '🥉'];
-    const colors = ['#f0a500', '#9ca3af', '#cd7f32'];
-    congratsEl.style.display = 'block';
-    congratsEl.style.background = myRank === 1
-      ? 'rgba(240,165,0,0.1)' : myRank === 2
-      ? 'rgba(156,163,175,0.1)' : 'rgba(205,127,50,0.1)';
-    congratsEl.style.border = `2px solid ${colors[myRank-1]}`;
-    congratsEl.style.color = colors[myRank-1];
-    congratsEl.innerHTML = `${medals[myRank-1]} 축하합니다! ${myRank}등입니다!`;
-  } else {
-    congratsEl.style.display = 'none';
-  }
-
-  // my rank highlight
-  const rankColors = ['#f0a500','#9ca3af','#cd7f32'];
-  const rankEl = document.getElementById('my-rank-num');
-  if (myEntry) {
-    rankEl.textContent = myRank + '등';
-    rankEl.style.color = myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
-    document.getElementById('my-rank-highlight').style.borderColor =
-      myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
-    document.getElementById('my-rank-time').textContent = '⏱ ' + fmtTime(myEntry.elapsed);
-    document.getElementById('my-rank-wpm').textContent = calcWPM(myEntry.answer, myEntry.elapsed) + ' 타/분';
-  } else {
-    rankEl.textContent = '–';
-    document.getElementById('my-rank-time').textContent = '';
-    document.getElementById('my-rank-wpm').textContent = '';
-  }
-
-  // full rank list
-  const listEl = document.getElementById('student-rank-list');
-  listEl.innerHTML = '';
-  entries.forEach((e, i) => {
-    const isMe = e.uid === myId;
-    const item = document.createElement('div');
-    item.style.cssText = `display:flex;align-items:center;gap:12px;padding:0.7rem 1rem;
-      border-radius:var(--radius-sm);border:1.5px solid ${isMe ? 'var(--accent)' : 'rgba(0,0,0,0.07)'};
-      background:${isMe ? 'rgba(233,69,96,0.05)' : '#fff'};
-      font-weight:${isMe ? '700' : '400'};`;
-    const numStyle = i < 3
-      ? `background:${['#f0a500','#9ca3af','#cd7f32'][i]};color:#fff;`
-      : 'background:#f0f2f5;color:var(--text2);';
-    item.innerHTML = `
-      <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;flex-shrink:0;${numStyle}">${i+1}</div>
-      <div style="flex:1;font-size:0.9rem;">${e.name}${isMe ? ' <span style="color:var(--accent);font-size:0.75rem;">(나)</span>' : ''}</div>
-      <div style="font-size:0.82rem;color:var(--text2);">${fmtTime(e.elapsed)}</div>`;
-    listEl.appendChild(item);
-  });
+  const resDiv = document.getElementById('student-result');
+  resDiv.style.display = 'flex';
+  document.getElementById('my-rank-num').textContent = (myIdx + 1) + '등';
+  document.getElementById('my-rank-time').textContent = fmtTime(entries[myIdx].elapsed);
 }
-
-function startTimer() {
-  stopTimer();
-  timerInterval = setInterval(() => {
-    if (!startTime) return;
-    const elapsed = Date.now() - startTime;
-    document.getElementById('student-timer').textContent = (elapsed/1000).toFixed(1) + 's';
-    const inp = document.getElementById('typing-input');
-    const wpm = calcWPM(inp.value, elapsed);
-    document.getElementById('wpm-display').textContent = wpm + ' 타/분';
-    document.getElementById('char-count').textContent = inp.value.length + '자';
-  }, 100);
-}
-function stopTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-}
-
-window.onTypingInput = function() {
-  const inp = document.getElementById('typing-input');
-  inp.classList.remove('error');
-  document.getElementById('error-msg').textContent = '';
-};
-
-window.onTypingKeydown = function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    submitAnswer();
-  }
-};
 
 window.submitAnswer = async function() {
-  const inp = document.getElementById('typing-input');
-  const answer = inp.value.trim();
-  if (!answer) { inp.classList.add('error'); document.getElementById('error-msg').textContent = '내용을 입력해주세요.'; return; }
-
-  const roundSnap = await get(ref(db, 'room/round'));
-  const round = roundSnap.val() || {};
+  const ans = document.getElementById('typing-input').value.trim();
+  if (!ans) return;
   const elapsed = Date.now() - startTime;
-
-  // copy type: check accuracy
-  let correct = true;
-  if (round.qtype === 'copy') {
-    correct = answer === round.question;
-    if (!correct) {
-      inp.classList.add('error');
-      document.getElementById('error-msg').textContent = '⚠ 텍스트가 다릅니다. 다시 확인해 주세요.';
-      return;
-    }
-  }
-
-  stopTimer();
-  inp.disabled = true;
-  document.getElementById('submit-btn').disabled = true;
-
-  // submit
-  await set(ref(db, 'room/submissions/' + myId), {
-    uid: myId, name: myName, answer, elapsed, correct,
-    wpm: calcWPM(answer, elapsed), submittedAt: Date.now()
-  });
-  // mark done
+  await set(ref(db, 'room/submissions/' + myId), { uid: myId, name: myName, answer: ans, elapsed });
   await update(ref(db, 'room/students/' + myId), { done: true });
-
-  roundActive = false;
   document.getElementById('student-game').classList.add('hidden');
   document.getElementById('student-done').classList.remove('hidden');
 };
 
-// ── INIT ──
-window.addEventListener('keydown', e => {
-  if (document.getElementById('screen-lobby').classList.contains('active') && e.key === 'Enter') {
-    window.enterRoom();
-  }
-});
+window.onTypingInput = () => {};
+window.onTypingKeydown = (e) => { if (e.key === 'Enter') submitAnswer(); };
+
+// ── INITIALIZE ──
+window.resetGame = nextRound;
 </script>
 </body>
 </html>

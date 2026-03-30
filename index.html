@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>타자 교실</title>
+<link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@300;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --gold: #f0a500;
+    --silver: #888;
+    --bronze: #cd7f32;
+    --text: #1a1a2e;
+    --text2: #6b7280;
+    --radius: 16px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(233,69,96,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(15,52,96,0.04) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── LOBBY ── */
+  #screen-lobby {
+    min-height: 100vh; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  .lobby-card {
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    width: 100%; max-width: 440px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  }
+  .lobby-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 2.2rem; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -1px;
+    margin-bottom: 0.4rem;
+  }
+  .lobby-sub { color: var(--text2); font-size: 0.9rem; margin-bottom: 2rem; }
+  .role-btns { display: flex; gap: 12px; margin-bottom: 1.5rem; }
+  .role-btn {
+    flex: 1; padding: 0.9rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: transparent; color: var(--text2);
+    cursor: pointer; font-size: 0.95rem; font-family: inherit;
+    transition: all .2s;
+  }
+  .role-btn.selected, .role-btn:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(233,69,96,0.08);
+  }
+  .input-field {
+    width: 100%; padding: 0.85rem 1rem;
+    background: #f7f8fa;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 1rem; font-family: inherit;
+    outline: none; transition: border .2s;
+    margin-bottom: 1rem;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; padding: 0.9rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 1rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary:hover { background: #c73652; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── TEACHER SCREEN ── */
+  #screen-teacher {
+    min-height: 100vh; padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .top-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.4rem; font-weight: 700; color: var(--accent);
+  }
+  .badge {
+    background: rgba(233,69,96,0.15); border: 1px solid var(--accent);
+    color: var(--accent); padding: 4px 14px; border-radius: 99px; font-size: 0.78rem;
+  }
+  .panel {
+    background: var(--surface); border: 1px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius); padding: 1.5rem;
+  }
+  .panel-title {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--text2); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .question-type-btns { display: flex; gap: 10px; margin-bottom: 1rem; }
+  .qtype-btn {
+    flex: 1; padding: 0.7rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: transparent; color: var(--text2);
+    cursor: pointer; font-size: 0.88rem; font-family: inherit;
+    transition: all .2s;
+  }
+  .qtype-btn.selected {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(233,69,96,0.08);
+  }
+  textarea.input-field { height: 80px; resize: vertical; }
+  .btn-secondary {
+    padding: 0.7rem 1.4rem;
+    background: transparent;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 0.88rem; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* BUBBLES */
+  .bubbles-area {
+    flex: 1; min-height: 280px;
+    display: flex; flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 14px; padding: 1rem;
+    background: #f7f8fa;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius);
+    overflow-y: auto;
+  }
+  .bubble {
+    padding: 12px 18px;
+    border-radius: 20px 20px 20px 4px;
+    max-width: 220px;
+    border: 1.5px solid;
+    animation: bubblePop .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes bubblePop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
+  .bubble-text { font-size: 0.88rem; line-height: 1.4; margin-bottom: 6px; }
+  .bubble-time { font-size: 0.7rem; opacity: 0.65; }
+
+  /* STUDENTS LIST */
+  .students-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .student-chip {
+    padding: 5px 14px; border-radius: 99px;
+    background: #f0f2f5;
+    border: 1px solid rgba(0,0,0,0.08);
+    font-size: 0.82rem; color: var(--text2);
+    transition: all .3s;
+  }
+  .student-chip.done {
+    background: rgba(233,69,96,0.08);
+    border-color: var(--accent); color: var(--accent);
+  }
+
+  /* RESULT / RANKING */
+  #screen-result {
+    min-height: 100vh; padding: 2rem;
+    align-items: center; justify-content: flex-start; flex-direction: column;
+    gap: 2rem;
+  }
+  .podium {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 16px; width: 100%; max-width: 600px;
+  }
+  .podium-item {
+    flex: 1; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px;
+  }
+  .podium-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    border: 3px solid;
+  }
+  .podium-block {
+    width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.8rem; font-weight: 700; color: rgba(0,0,0,0.4);
+  }
+  .podium-name { font-size: 0.9rem; font-weight: 700; }
+  .podium-time { font-size: 0.78rem; color: var(--text2); }
+
+  .rank-list { width: 100%; max-width: 560px; }
+  .rank-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0.85rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    animation: slideIn .3s ease both;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+  }
+  .rank-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    background: #f0f2f5; color: var(--text2);
+    flex-shrink: 0;
+  }
+  .rank-num.r1 { background: #f0a500; color: #fff; }
+  .rank-num.r2 { background: #9ca3af; color: #fff; }
+  .rank-num.r3 { background: #cd7f32; color: #fff; }
+  .rank-name { flex: 1; font-weight: 500; }
+  .rank-time { font-size: 0.82rem; color: var(--text2); }
+  .rank-score { font-size: 0.78rem; color: var(--accent); }
+
+  /* STUDENT SCREEN */
+  #screen-student {
+    min-height: 100vh; padding: 2rem;
+    align-items: center; justify-content: center;
+  }
+  .student-card {
+    width: 100%; max-width: 560px;
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .prompt-box {
+    background: rgba(233,69,96,0.07);
+    border: 1.5px solid rgba(233,69,96,0.25);
+    border-radius: var(--radius-sm);
+    padding: 1.2rem 1.4rem;
+    font-size: 1.15rem; line-height: 1.7;
+    color: var(--text); min-height: 64px;
+  }
+  .typing-input {
+    width: 100%; padding: 1rem 1.2rem;
+    background: #f7f8fa;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 1.05rem; font-family: inherit;
+    outline: none; transition: border .2s;
+    resize: none; height: 80px;
+  }
+  .typing-input:focus { border-color: var(--accent); }
+  .typing-input.error { border-color: #ff6b6b; background: rgba(255,107,107,0.06); }
+  .typing-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-bar {
+    display: flex; align-items: center; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .timer {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.8rem; font-weight: 700; color: var(--accent);
+    min-width: 80px;
+  }
+  .wpm-badge {
+    padding: 4px 14px; border-radius: 99px;
+    background: #f0f2f5;
+    font-size: 0.82rem; color: var(--text2);
+  }
+  .waiting-msg {
+    text-align: center; color: var(--text2); font-size: 0.95rem;
+    padding: 2rem;
+  }
+  .waiting-dot {
+    display: inline-block; animation: blink 1.2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* FINAL RESULT */
+  #screen-final {
+    min-height: 100vh; padding: 2rem;
+    align-items: center; flex-direction: column; gap: 2rem;
+  }
+  .final-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 2rem; font-weight: 700; text-align: center;
+    color: #f0a500;
+  }
+  .game-history { width: 100%; max-width: 600px; }
+  .history-item {
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 8px;
+    font-size: 0.88rem; color: var(--text2);
+  }
+  .history-item strong { color: var(--text); }
+
+  /* UTIL */
+  .flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .grow { flex: 1; }
+  .hidden { display: none !important; }
+  .mt { margin-top: 1rem; }
+  .center { text-align: center; }
+  .small { font-size: 0.82rem; color: var(--text2); }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOBBY ══════════ -->
+<div id="screen-lobby" class="screen active">
+  <div class="lobby-card">
+    <div class="lobby-title">⌨️ 타자 교실</div>
+    <div class="lobby-sub">실시간 타자 연습 게임</div>
+    <div class="role-btns">
+      <button class="role-btn selected" id="role-student" onclick="selectRole('student')">🙋 학생</button>
+      <button class="role-btn" id="role-teacher" onclick="selectRole('teacher')">👩‍🏫 선생님</button>
+    </div>
+    <input class="input-field" id="lobby-name" placeholder="이름을 입력하세요" maxlength="12" />
+    <div id="teacher-pw-wrap" class="hidden">
+      <input class="input-field" id="lobby-pw" type="password" placeholder="선생님 비밀번호 (기본: 1234)" />
+    </div>
+    <button class="btn-primary" id="lobby-enter-btn" onclick="enterRoom()">입장하기</button>
+    <div class="small mt center" id="lobby-error"></div>
+  </div>
+</div>
+
+<!-- ══════════ TEACHER ══════════ -->
+<div id="screen-teacher" class="screen">
+  <div class="top-bar">
+    <div class="top-title">👩‍🏫 선생님 대시보드</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span class="badge" id="student-count-badge">학생 0명</span>
+      <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
+      <button class="btn-secondary" onclick="resetGame()" id="reset-btn" style="display:none">🔄 새 문제</button>
+    </div>
+  </div>
+
+  <!-- 학생 현황 -->
+  <div class="panel">
+    <div class="panel-title">접속 중인 학생</div>
+    <div class="students-list" id="students-list"></div>
+  </div>
+
+  <!-- 출제 패널 -->
+  <div class="panel" id="question-panel">
+    <div class="panel-title">문제 출제</div>
+    <div class="question-type-btns">
+      <button class="qtype-btn selected" id="qtype-copy" onclick="selectQtype('copy')">📝 따라쓰기</button>
+      <button class="qtype-btn" id="qtype-answer" onclick="selectQtype('answer')">💬 답변하기</button>
+    </div>
+    <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 입력하세요..."></textarea>
+    <div class="flex-row">
+      <button class="btn-primary grow" onclick="startRound()">▶ 게임 시작</button>
+    </div>
+  </div>
+
+  <!-- 버블 영역 -->
+  <div class="panel" id="bubble-panel" style="display:none">
+    <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>실시간 제출 현황</span>
+      <span id="submit-count" style="color:var(--accent);font-size:0.9rem;font-weight:700;"></span>
+    </div>
+    <div id="teacher-prompt-display" style="margin-bottom:1rem;padding:0.8rem 1rem;background:#f7f8fa;border-radius:var(--radius-sm);font-size:0.95rem;color:var(--text2);border:1px solid rgba(0,0,0,0.06);"></div>
+    <div id="all-submitted-notice" style="display:none;margin-bottom:1rem;padding:0.9rem 1.2rem;background:rgba(22,163,74,0.08);border:1.5px solid #16a34a;border-radius:var(--radius-sm);color:#15803d;font-weight:700;font-size:0.95rem;text-align:center;">
+      🎉 전체 학생의 답안이 제출되었습니다!
+    </div>
+    <div class="bubbles-area" id="bubbles-area"></div>
+    <div class="flex-row mt">
+      <button class="btn-primary grow" onclick="showRoundResult()">📊 결과 보기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STUDENT ══════════ -->
+<div id="screen-student" class="screen">
+  <div class="student-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.1rem;font-weight:700;">⌨️ 타자 교실</div>
+      <span class="badge" id="student-name-badge"></span>
+    </div>
+
+    <div id="student-waiting" class="waiting-msg">
+      선생님의 문제를 기다리는 중<span class="waiting-dot">...</span>
+    </div>
+
+    <div id="student-game" class="hidden">
+      <div class="small" id="game-type-label" style="margin-bottom:0.5rem;"></div>
+      <div class="prompt-box" id="student-prompt"></div>
+      <div class="status-bar">
+        <div class="timer" id="student-timer">0.0s</div>
+        <div class="wpm-badge" id="wpm-display">-- 타/분</div>
+        <div class="wpm-badge" id="char-count">0자</div>
+      </div>
+      <textarea class="typing-input" id="typing-input"
+        placeholder="여기에 입력하세요..."
+        oninput="onTypingInput()"
+        onkeydown="onTypingKeydown(event)"></textarea>
+      <div id="error-msg" class="small" style="color:#ff6b6b;min-height:18px;"></div>
+      <button class="btn-primary" id="submit-btn" onclick="submitAnswer()">제출하기 ↵</button>
+    </div>
+
+    <div id="student-done" class="hidden waiting-msg">
+      ✅ 제출 완료! 다른 친구들을 기다리는 중<span class="waiting-dot">...</span>
+    </div>
+
+    <!-- 학생 결과 화면 -->
+    <div id="student-result" class="hidden" style="display:none;flex-direction:column;gap:1rem;">
+      <div id="student-congrats" style="display:none;text-align:center;padding:1.2rem;border-radius:var(--radius);font-family:'Gmarket Sans',sans-serif;font-size:1.5rem;font-weight:700;"></div>
+      <div id="my-rank-highlight" style="text-align:center;padding:1.5rem;background:#f7f8fa;border-radius:var(--radius);border:2px solid var(--accent);">
+        <div style="font-size:0.82rem;color:var(--text2);margin-bottom:0.3rem;">내 순위</div>
+        <div id="my-rank-num" style="font-family:'Gmarket Sans',sans-serif;font-size:3rem;font-weight:700;color:var(--accent);"></div>
+        <div id="my-rank-time" style="font-size:1rem;color:var(--text2);margin-top:0.2rem;"></div>
+        <div id="my-rank-wpm" style="font-size:0.88rem;color:var(--text2);margin-top:0.1rem;"></div>
+      </div>
+      <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-top:0.5rem;">전체 순위</div>
+      <div id="student-rank-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+  </div><!-- end student-card -->
+</div><!-- end screen-student -->
+
+<!-- ══════════ RESULT (ROUND) ══════════ -->
+<div id="screen-result" class="screen">
+  <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;">
+    🏅 라운드 결과
+  </div>
+  <div class="podium" id="podium"></div>
+  <div class="rank-list" id="rank-list"></div>
+  <div class="flex-row" style="justify-content:center;gap:12px;" id="result-btns">
+    <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
+    <button class="btn-primary" id="next-round-btn" onclick="nextRound()" style="display:none">다음 문제 ▶</button>
+  </div>
+</div>
+
+<!-- ══════════ FINAL RESULT ══════════ -->
+<div id="screen-final" class="screen">
+  <div class="final-title">🏆 최종 순위</div>
+  <div class="podium" id="final-podium"></div>
+  <div class="rank-list" id="final-rank-list"></div>
+  <div class="game-history" id="game-history"></div>
+  <div class="flex-row" style="justify-content:center;">
+    <button class="btn-secondary" onclick="goBackToResult()">← 돌아가기</button>
+    <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none">새 게임 시작 ▶</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, update, remove, off }
+  from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC9HyOo0oiBlY73nfBrv0kBJO2hyyzpicg",
+  authDomain: "classroom-typing.firebaseapp.com",
+  databaseURL: "https://classroom-typing-default-rtdb.firebaseio.com",
+  projectId: "classroom-typing",
+  storageBucket: "classroom-typing.firebasestorage.app",
+  messagingSenderId: "188633279345",
+  appId: "1:188633279345:web:327c0e8919ce0d26aa64d0",
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── STATE ──
+let myRole = 'student';
+let myName = '';
+let myId = '';
+let currentQtype = 'copy';
+let timerInterval = null;
+let startTime = null;
+let roundActive = false;
+let prevScreen = 'result';
+
+// BUBBLE COLORS (vivid, light-mode friendly)
+const BUBBLE_COLORS = [
+  { bg: 'rgba(233,69,96,0.10)',  border: '#e94560', text: '#c0283e' },
+  { bg: 'rgba(37,99,235,0.10)',  border: '#2563eb', text: '#1d4ed8' },
+  { bg: 'rgba(22,163,74,0.10)',  border: '#16a34a', text: '#15803d' },
+  { bg: 'rgba(234,88,12,0.10)',  border: '#ea580c', text: '#c2410c' },
+  { bg: 'rgba(124,58,237,0.10)', border: '#7c3aed', text: '#6d28d9' },
+  { bg: 'rgba(219,39,119,0.10)', border: '#db2777', text: '#be185d' },
+  { bg: 'rgba(202,138,4,0.10)',  border: '#ca8a04', text: '#a16207' },
+  { bg: 'rgba(6,182,212,0.10)',  border: '#06b6d4', text: '#0e7490' },
+  { bg: 'rgba(239,68,68,0.10)',  border: '#ef4444', text: '#dc2626' },
+  { bg: 'rgba(16,185,129,0.10)', border: '#10b981', text: '#059669' },
+];
+function getColor(idx) { return BUBBLE_COLORS[idx % BUBBLE_COLORS.length]; }
+
+// ── HELPERS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+function fmtTime(ms) {
+  if (ms < 60000) return (ms/1000).toFixed(2) + 's';
+  return Math.floor(ms/60000) + 'm ' + ((ms%60000)/1000).toFixed(1) + 's';
+}
+function calcWPM(text, ms) {
+  const words = text.length / 5;
+  const mins = ms / 60000;
+  return mins > 0 ? Math.round(words / mins) : 0;
+}
+
+// ── ROLE SELECT ──
+window.selectRole = function(role) {
+  myRole = role;
+  document.getElementById('role-student').classList.toggle('selected', role === 'student');
+  document.getElementById('role-teacher').classList.toggle('selected', role === 'teacher');
+  document.getElementById('teacher-pw-wrap').classList.toggle('hidden', role !== 'teacher');
+};
+
+// ── QTYPE ──
+window.selectQtype = function(qt) {
+  currentQtype = qt;
+  document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
+  document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+};
+
+// ── ENTER ──
+window.enterRoom = async function() {
+  const name = document.getElementById('lobby-name').value.trim();
+  const errEl = document.getElementById('lobby-error');
+  errEl.textContent = '';
+  if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
+
+  if (myRole === 'teacher') {
+    const pw = document.getElementById('lobby-pw').value;
+    if (pw !== '1234' && pw !== '') {
+      // allow blank → default 1234
+    }
+    if (pw && pw !== '1234') { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
+    myName = name; myId = 'teacher';
+    await set(ref(db, 'room/teacher'), { name, online: true });
+    showScreen('teacher');
+    listenAsTeacher();
+  } else {
+    myName = name;
+    myId = 'student_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    await set(ref(db, 'room/students/' + myId), { name, online: true, done: false });
+    showScreen('student');
+    document.getElementById('student-name-badge').textContent = name;
+    listenAsStudent();
+    // cleanup on unload
+    window.addEventListener('beforeunload', () => {
+      remove(ref(db, 'room/students/' + myId));
+    });
+  }
+};
+
+// ── TEACHER LISTENERS ──
+function listenAsTeacher() {
+  // students
+  onValue(ref(db, 'room/students'), snap => {
+    const students = snap.val() || {};
+    const list = document.getElementById('students-list');
+    list.innerHTML = '';
+    let count = 0;
+    let doneCount = 0;
+    Object.entries(students).forEach(([id, s]) => {
+      if (!s.online) return;
+      count++;
+      if (s.done) doneCount++;
+      const chip = document.createElement('div');
+      chip.className = 'student-chip' + (s.done ? ' done' : '');
+      chip.textContent = s.done ? '✓ ' + s.name : s.name;
+      chip.id = 'chip-' + id;
+      list.appendChild(chip);
+    });
+    document.getElementById('student-count-badge').textContent = '학생 ' + count + '명';
+    // all-submitted notice
+    const notice = document.getElementById('all-submitted-notice');
+    if (notice) {
+      notice.style.display = (count > 0 && doneCount === count) ? 'block' : 'none';
+    }
+  });
+
+  // submissions → bubbles
+  onValue(ref(db, 'room/submissions'), snap => {
+    const subs = snap.val() || {};
+    const area = document.getElementById('bubbles-area');
+    area.innerHTML = '';
+    const entries = Object.values(subs);
+    entries.forEach((sub, i) => {
+      const c = getColor(i);
+      const div = document.createElement('div');
+      div.className = 'bubble';
+      div.style.cssText = `background:${c.bg};border-color:${c.border};color:${c.text};`;
+      div.innerHTML = `<div class="bubble-name">${sub.name}</div>
+        <div class="bubble-text">${sub.answer}</div>
+        <div class="bubble-time">⏱ ${fmtTime(sub.elapsed)}</div>`;
+      area.appendChild(div);
+    });
+    document.getElementById('submit-count').textContent =
+      entries.length + '명 제출';
+  });
+
+  // round state
+  onValue(ref(db, 'room/round'), snap => {
+    const round = snap.val();
+    if (!round) return;
+    if (round.state === 'active') {
+      document.getElementById('question-panel').style.display = 'none';
+      document.getElementById('bubble-panel').style.display = 'block';
+      document.getElementById('reset-btn').style.display = '';
+      document.getElementById('teacher-prompt-display').textContent =
+        (round.qtype === 'copy' ? '📝 따라쓰기: ' : '💬 답변하기: ') + round.question;
+    } else if (round.state === 'idle') {
+      document.getElementById('question-panel').style.display = 'block';
+      document.getElementById('bubble-panel').style.display = 'none';
+      document.getElementById('reset-btn').style.display = 'none';
+    }
+  });
+}
+
+// ── START ROUND ──
+window.startRound = async function() {
+  const q = document.getElementById('question-text').value.trim();
+  if (!q) { alert('문제를 입력해주세요!'); return; }
+  // clear prev
+  await remove(ref(db, 'room/submissions'));
+  await remove(ref(db, 'room/roundResult'));
+  // reset student done flags
+  const snap = await get(ref(db, 'room/students'));
+  const students = snap.val() || {};
+  const updates = {};
+  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
+  await update(ref(db), updates);
+  // set round
+  await set(ref(db, 'room/round'), {
+    question: q, qtype: currentQtype,
+    state: 'active', startedAt: Date.now()
+  });
+};
+
+// ── SHOW ROUND RESULT ──
+window.showRoundResult = async function() {
+  const snap = await get(ref(db, 'room/submissions'));
+  const subs = snap.val() || {};
+  const roundSnap = await get(ref(db, 'room/round'));
+  const round = roundSnap.val() || {};
+  const entries = Object.values(subs).sort((a,b) => a.elapsed - b.elapsed);
+  renderResult(entries, round.qtype);
+  // save to history
+  const historyEntry = { question: round.question, qtype: round.qtype, entries };
+  push(ref(db, 'room/history'), historyEntry);
+  // update cumulative scores
+  entries.forEach((e, i) => {
+    const pts = Math.max(10 - i, 1);
+    const scoreRef = ref(db, 'room/scores/' + e.uid);
+    get(scoreRef).then(s => {
+      const prev = s.val() || { name: e.name, points: 0, rounds: 0 };
+      set(scoreRef, { name: e.name, points: prev.points + pts, rounds: prev.rounds + 1 });
+    });
+  });
+  // push result to Firebase so students can see their ranking
+  await set(ref(db, 'room/roundResult'), { entries, qtype: round.qtype, publishedAt: Date.now() });
+  showScreen('result');
+  prevScreen = 'result';
+  document.getElementById('next-round-btn').style.display = '';
+};
+
+function renderResult(entries, qtype) {
+  // podium
+  const podiumEl = document.getElementById('podium');
+  podiumEl.innerHTML = '';
+  const podiumOrder = [1, 0, 2]; // 2nd, 1st, 3rd
+  const heights = [90, 130, 70];
+  const colors = [
+    { bg: '#c0c0c0', border: '#a8a8a8', text: '#000' },
+    { bg: '#ffd700', border: '#e6c200', text: '#000' },
+    { bg: '#cd7f32', border: '#b56a20', text: '#fff' },
+  ];
+  const medals = ['🥇','🥈','🥉'];
+  podiumOrder.forEach((rankIdx, pos) => {
+    const e = entries[rankIdx];
+    if (!e) return;
+    const c = colors[rankIdx];
+    const item = document.createElement('div');
+    item.className = 'podium-item';
+    item.innerHTML = `
+      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
+        ${medals[rankIdx]}
+      </div>
+      <div class="podium-name">${e.name}</div>
+      <div class="podium-time">${fmtTime(e.elapsed)}</div>
+      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
+        ${rankIdx + 1}
+      </div>`;
+    podiumEl.appendChild(item);
+  });
+
+  // list
+  const listEl = document.getElementById('rank-list');
+  listEl.innerHTML = '';
+  entries.forEach((e, i) => {
+    const item = document.createElement('div');
+    item.className = 'rank-item';
+    item.style.animationDelay = (i * 0.06) + 's';
+    const wpm = calcWPM(e.answer, e.elapsed);
+    const accurate = qtype === 'copy' ? (e.correct ? '✓ 정확' : '✗ 오류') : '–';
+    item.innerHTML = `
+      <div class="rank-num ${i<3?'r'+(i+1):''}">${i+1}</div>
+      <div class="rank-name">${e.name}</div>
+      <div class="rank-score">${qtype==='copy'?accurate:''}</div>
+      <div class="rank-time">${fmtTime(e.elapsed)} · ${wpm}타/분</div>`;
+    listEl.appendChild(item);
+  });
+}
+
+// ── SHOW FINAL RESULT ──
+window.showFinalResult = async function() {
+  const [scoresSnap, histSnap] = await Promise.all([
+    get(ref(db, 'room/scores')),
+    get(ref(db, 'room/history'))
+  ]);
+  const scores = scoresSnap.val() || {};
+  const history = histSnap.val() || {};
+
+  const sorted = Object.values(scores).sort((a,b) => b.points - a.points);
+
+  // podium
+  const podiumEl = document.getElementById('final-podium');
+  podiumEl.innerHTML = '';
+  const podiumOrder = [1, 0, 2];
+  const heights = [90, 130, 70];
+  const pColors = [
+    { bg: '#c0c0c0', border: '#a8a8a8', text: '#000' },
+    { bg: '#ffd700', border: '#e6c200', text: '#000' },
+    { bg: '#cd7f32', border: '#b56a20', text: '#fff' },
+  ];
+  const medals = ['🥇','🥈','🥉'];
+  podiumOrder.forEach((rankIdx, pos) => {
+    const e = sorted[rankIdx];
+    if (!e) return;
+    const c = pColors[rankIdx];
+    const item = document.createElement('div');
+    item.className = 'podium-item';
+    item.innerHTML = `
+      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
+        ${medals[rankIdx]}
+      </div>
+      <div class="podium-name">${e.name}</div>
+      <div class="podium-time">${e.points}점 · ${e.rounds}라운드</div>
+      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
+        ${rankIdx + 1}
+      </div>`;
+    podiumEl.appendChild(item);
+  });
+
+  // rank list
+  const listEl = document.getElementById('final-rank-list');
+  listEl.innerHTML = '';
+  sorted.forEach((e, i) => {
+    const item = document.createElement('div');
+    item.className = 'rank-item';
+    item.style.animationDelay = (i * 0.06) + 's';
+    item.innerHTML = `
+      <div class="rank-num ${i<3?'r'+(i+1):''}">${i+1}</div>
+      <div class="rank-name">${e.name}</div>
+      <div class="rank-score">${e.rounds}라운드 참여</div>
+      <div class="rank-time">${e.points}점</div>`;
+    listEl.appendChild(item);
+  });
+
+  // history
+  const histEl = document.getElementById('game-history');
+  histEl.innerHTML = '<div class="panel-title" style="margin-bottom:0.8rem;">게임 기록</div>';
+  Object.values(history).forEach((h, i) => {
+    const top = h.entries && h.entries[0];
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<strong>라운드 ${i+1}</strong> [${h.qtype==='copy'?'따라쓰기':'답변하기'}] "${h.question.slice(0,30)}${h.question.length>30?'…':''}"
+      ${top ? ` → 1위: <strong>${top.name}</strong> (${fmtTime(top.elapsed)})` : ''}`;
+    histEl.appendChild(div);
+  });
+
+  if (myRole === 'teacher') {
+    document.getElementById('final-new-btn').style.display = '';
+  }
+  showScreen('final');
+};
+
+window.goBackToResult = function() {
+  showScreen(prevScreen);
+};
+
+// ── NEXT ROUND ──
+window.nextRound = async function() {
+  await set(ref(db, 'room/round'), { state: 'idle' });
+  await remove(ref(db, 'room/submissions'));
+  await remove(ref(db, 'room/roundResult'));
+  document.getElementById('question-text').value = '';
+  showScreen('teacher');
+};
+
+window.resetGame = window.nextRound;
+
+// ── STUDENT LISTENERS ──
+function listenAsStudent() {
+  onValue(ref(db, 'room/round'), snap => {
+    const round = snap.val();
+    if (!round || round.state !== 'active') {
+      // reset to waiting when new round starts or idle
+      if (!round || round.state === 'idle') {
+        document.getElementById('student-waiting').classList.remove('hidden');
+        document.getElementById('student-game').classList.add('hidden');
+        document.getElementById('student-done').classList.add('hidden');
+        const sr = document.getElementById('student-result');
+        sr.classList.add('hidden'); sr.style.display = 'none';
+        stopTimer();
+        roundActive = false;
+      }
+      return;
+    }
+    // new round
+    if (!roundActive) {
+      roundActive = true;
+      document.getElementById('student-waiting').classList.add('hidden');
+      document.getElementById('student-done').classList.add('hidden');
+      const sr = document.getElementById('student-result');
+      sr.classList.add('hidden'); sr.style.display = 'none';
+      document.getElementById('student-game').classList.remove('hidden');
+      document.getElementById('student-prompt').textContent = round.question;
+      document.getElementById('game-type-label').textContent =
+        round.qtype === 'copy' ? '📝 따라쓰기 — 아래 문장을 그대로 입력하세요' : '💬 답변하기 — 자유롭게 답변하세요';
+      const inp = document.getElementById('typing-input');
+      inp.value = '';
+      inp.disabled = false;
+      inp.classList.remove('error');
+      document.getElementById('error-msg').textContent = '';
+      document.getElementById('submit-btn').disabled = false;
+      startTime = Date.now();
+      startTimer();
+    }
+  });
+
+  // listen for teacher publishing results
+  onValue(ref(db, 'room/roundResult'), snap => {
+    const result = snap.val();
+    if (!result || !result.entries) return;
+    showStudentResult(result.entries, result.qtype);
+  });
+}
+
+function showStudentResult(entries, qtype) {
+  document.getElementById('student-waiting').classList.add('hidden');
+  document.getElementById('student-game').classList.add('hidden');
+  document.getElementById('student-done').classList.add('hidden');
+
+  const sr = document.getElementById('student-result');
+  sr.classList.remove('hidden');
+  sr.style.display = 'flex';
+
+  // find my rank
+  const myIdx = entries.findIndex(e => e.uid === myId);
+  const myRank = myIdx + 1;
+  const myEntry = entries[myIdx];
+
+  // congrats for top 3
+  const congratsEl = document.getElementById('student-congrats');
+  if (myRank >= 1 && myRank <= 3 && myEntry) {
+    const medals = ['🥇', '🥈', '🥉'];
+    const colors = ['#f0a500', '#9ca3af', '#cd7f32'];
+    congratsEl.style.display = 'block';
+    congratsEl.style.background = myRank === 1
+      ? 'rgba(240,165,0,0.1)' : myRank === 2
+      ? 'rgba(156,163,175,0.1)' : 'rgba(205,127,50,0.1)';
+    congratsEl.style.border = `2px solid ${colors[myRank-1]}`;
+    congratsEl.style.color = colors[myRank-1];
+    congratsEl.innerHTML = `${medals[myRank-1]} 축하합니다! ${myRank}등입니다!`;
+  } else {
+    congratsEl.style.display = 'none';
+  }
+
+  // my rank highlight
+  const rankColors = ['#f0a500','#9ca3af','#cd7f32'];
+  const rankEl = document.getElementById('my-rank-num');
+  if (myEntry) {
+    rankEl.textContent = myRank + '등';
+    rankEl.style.color = myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
+    document.getElementById('my-rank-highlight').style.borderColor =
+      myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
+    document.getElementById('my-rank-time').textContent = '⏱ ' + fmtTime(myEntry.elapsed);
+    document.getElementById('my-rank-wpm').textContent = calcWPM(myEntry.answer, myEntry.elapsed) + ' 타/분';
+  } else {
+    rankEl.textContent = '–';
+    document.getElementById('my-rank-time').textContent = '';
+    document.getElementById('my-rank-wpm').textContent = '';
+  }
+
+  // full rank list
+  const listEl = document.getElementById('student-rank-list');
+  listEl.innerHTML = '';
+  entries.forEach((e, i) => {
+    const isMe = e.uid === myId;
+    const item = document.createElement('div');
+    item.style.cssText = `display:flex;align-items:center;gap:12px;padding:0.7rem 1rem;
+      border-radius:var(--radius-sm);border:1.5px solid ${isMe ? 'var(--accent)' : 'rgba(0,0,0,0.07)'};
+      background:${isMe ? 'rgba(233,69,96,0.05)' : '#fff'};
+      font-weight:${isMe ? '700' : '400'};`;
+    const numStyle = i < 3
+      ? `background:${['#f0a500','#9ca3af','#cd7f32'][i]};color:#fff;`
+      : 'background:#f0f2f5;color:var(--text2);';
+    item.innerHTML = `
+      <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;flex-shrink:0;${numStyle}">${i+1}</div>
+      <div style="flex:1;font-size:0.9rem;">${e.name}${isMe ? ' <span style="color:var(--accent);font-size:0.75rem;">(나)</span>' : ''}</div>
+      <div style="font-size:0.82rem;color:var(--text2);">${fmtTime(e.elapsed)}</div>`;
+    listEl.appendChild(item);
+  });
+}
+
+function startTimer() {
+  stopTimer();
+  timerInterval = setInterval(() => {
+    if (!startTime) return;
+    const elapsed = Date.now() - startTime;
+    document.getElementById('student-timer').textContent = (elapsed/1000).toFixed(1) + 's';
+    const inp = document.getElementById('typing-input');
+    const wpm = calcWPM(inp.value, elapsed);
+    document.getElementById('wpm-display').textContent = wpm + ' 타/분';
+    document.getElementById('char-count').textContent = inp.value.length + '자';
+  }, 100);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+window.onTypingInput = function() {
+  const inp = document.getElementById('typing-input');
+  inp.classList.remove('error');
+  document.getElementById('error-msg').textContent = '';
+};
+
+window.onTypingKeydown = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    submitAnswer();
+  }
+};
+
+window.submitAnswer = async function() {
+  const inp = document.getElementById('typing-input');
+  const answer = inp.value.trim();
+  if (!answer) { inp.classList.add('error'); document.getElementById('error-msg').textContent = '내용을 입력해주세요.'; return; }
+
+  const roundSnap = await get(ref(db, 'room/round'));
+  const round = roundSnap.val() || {};
+  const elapsed = Date.now() - startTime;
+
+  // copy type: check accuracy
+  let correct = true;
+  if (round.qtype === 'copy') {
+    correct = answer === round.question;
+    if (!correct) {
+      inp.classList.add('error');
+      document.getElementById('error-msg').textContent = '⚠ 텍스트가 다릅니다. 다시 확인해 주세요.';
+      return;
+    }
+  }
+
+  stopTimer();
+  inp.disabled = true;
+  document.getElementById('submit-btn').disabled = true;
+
+  // submit
+  await set(ref(db, 'room/submissions/' + myId), {
+    uid: myId, name: myName, answer, elapsed, correct,
+    wpm: calcWPM(answer, elapsed), submittedAt: Date.now()
+  });
+  // mark done
+  await update(ref(db, 'room/students/' + myId), { done: true });
+
+  roundActive = false;
+  document.getElementById('student-game').classList.add('hidden');
+  document.getElementById('student-done').classList.remove('hidden');
+};
+
+// ── INIT ──
+window.addEventListener('keydown', e => {
+  if (document.getElementById('screen-lobby').classList.contains('active') && e.key === 'Enter') {
+    window.enterRoom();
+  }
+});
+</script>
+</body>
+</html>

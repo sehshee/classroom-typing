@@ -301,7 +301,11 @@
 
   /* ── LIVE BUBBLE SCREEN ── */
   #screen-live {
-    min-height: 100vh; position: relative; overflow: hidden; background: var(--bg);
+    min-height: 100vh; display: flex; flex-direction: column; background: var(--bg);
+    overflow: hidden;
+  }
+  #bubble-canvas {
+    position: relative; flex: 1; overflow: hidden;
   }
   .live-header {
     position: relative; z-index: 10;
@@ -311,13 +315,12 @@
     border-bottom: 1px solid rgba(0,0,0,0.07); flex-wrap: wrap; gap: 0.8rem;
   }
   .live-question-box {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 20; text-align: center; padding: 2rem 3rem;
-    max-width: 700px; width: 90%; pointer-events: none;
-    background: rgba(247,248,250,0.82); backdrop-filter: blur(10px);
-    border-radius: 24px; border: 1.5px solid rgba(233,69,96,0.15);
-    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+    position: relative; z-index: 20;
+    text-align: center; padding: 1.2rem 2rem;
+    width: 100%;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1.5px solid rgba(233,69,96,0.18);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
   }
   .live-question-label {
     font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
@@ -552,6 +555,7 @@
     <div class="live-question-label" id="live-qtype-label"></div>
     <div class="live-question-text" id="live-question-text"></div>
   </div>
+  <div id="bubble-canvas"></div>
 </div>
 
 <!-- ══════════ STUDENT GAME SCREEN ══════════ -->
@@ -998,36 +1002,36 @@ function listenAsTeacher() {
   onValue(ref(db, rp('submissions')), snap => {
     const subs = snap.val() || {};
     const entries = Object.values(subs);
-    const liveScreen = document.getElementById('screen-live');
     const liveCount = document.getElementById('live-submit-count');
     if (liveCount) liveCount.textContent = entries.length + '명 제출';
 
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-    const headerH = 72;
-    const PAD = 12;
+    const canvas = document.getElementById('bubble-canvas');
+    if (!canvas) return;
 
-    // Remove old bubbles and re-layout all from scratch each time
-    liveScreen.querySelectorAll('.float-bubble').forEach(b => b.remove());
+    // Remove old bubbles
+    canvas.querySelectorAll('.float-bubble').forEach(b => b.remove());
 
     const n = entries.length;
     if (n === 0) return;
 
-    // Max bubble size — never larger than 260×150 regardless of student count
+    // Measure available area (below question box)
+    const canvasW = canvas.offsetWidth  || window.innerWidth;
+    const canvasH = canvas.offsetHeight || (window.innerHeight - 180);
+    const PAD = 12;
+
+    // Max bubble size cap
     const MAX_BW = 260;
     const MAX_BH = 150;
 
-    // Grid layout
-    const cols = Math.ceil(Math.sqrt(n * screenW / (screenH - headerH)));
+    // Grid layout within canvas
+    const cols = Math.ceil(Math.sqrt(n * canvasW / canvasH));
     const rows = Math.ceil(n / cols);
-    const cellW = screenW / cols;
-    const cellH = (screenH - headerH) / rows;
+    const cellW = canvasW / cols;
+    const cellH = canvasH / rows;
 
-    // Clamp bubble to cell size AND hard max
     const bw = Math.min(MAX_BW, Math.max(140, cellW - PAD * 2));
     const bh = Math.min(MAX_BH, Math.max(90,  cellH - PAD * 2));
 
-    // Base font sizes — approx 2× larger than before (22/18 instead of 13/11)
     const fBase = Math.min(1, bw / 200);
     const fName = Math.round(fBase * 22);
     const fText = Math.round(fBase * 26);
@@ -1036,9 +1040,8 @@ function listenAsTeacher() {
     entries.forEach((sub, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      // Center bubble within its cell
       const rx = col * cellW + (cellW - bw) / 2;
-      const ry = headerH + row * cellH + (cellH - bh) / 2;
+      const ry = row * cellH + (cellH - bh) / 2;
 
       const c = getColor(sub.uid);
       const div = document.createElement('div');
@@ -1056,7 +1059,7 @@ function listenAsTeacher() {
         <div class="bubble-name" style="font-size:${fName}px;font-weight:700;">${sub.name}</div>
         <div class="bubble-text" style="font-size:${fText}px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub.answer}</div>
         <div class="bubble-time" style="font-size:${fTime}px;opacity:0.75;">⏱ ${fmtTime(sub.elapsed)} · ${wpm}타/분</div>`;
-      liveScreen.appendChild(div);
+      canvas.appendChild(div);
     });
     renderedBubbleIds = new Set(entries.map(e => e.uid));
   });
@@ -1073,7 +1076,7 @@ function listenAsTeacher() {
     } else if (round.state === 'idle') {
       document.getElementById('question-panel').style.display = 'block';
       document.getElementById('reset-btn').style.display = 'none';
-      document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
+      document.getElementById('bubble-canvas').querySelectorAll('.float-bubble').forEach(b => b.remove());
       renderedBubbleIds.clear();
       showScreen('teacher');
     }
@@ -1239,7 +1242,7 @@ window.nextRound = async function() {
   Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
-  document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
+  document.getElementById('bubble-canvas').querySelectorAll('.float-bubble').forEach(b => b.remove());
   renderedBubbleIds.clear();
   showScreen('teacher');
 };

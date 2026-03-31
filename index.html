@@ -9,12 +9,9 @@
   :root {
     --bg: #f7f8fa;
     --surface: #ffffff;
-    --surface2: #f0f2f5;
     --accent: #e94560;
     --accent2: #0f3460;
     --gold: #f0a500;
-    --silver: #888;
-    --bronze: #cd7f32;
     --text: #1a1a2e;
     --text2: #6b7280;
     --radius: 16px;
@@ -36,45 +33,156 @@
     pointer-events: none; z-index: 0;
   }
 
-  /* ── SCREENS ── */
   .screen { display: none; position: relative; z-index: 1; }
   .screen.active { display: flex; flex-direction: column; }
 
-  /* ── LOBBY ── */
-  #screen-lobby {
-    min-height: 100vh; align-items: center; justify-content: center;
-    padding: 2rem;
+  /* ── HOME LOBBY (선생님 / 학생 선택) ── */
+  #screen-home {
+    min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;
   }
-  .lobby-card {
+  .home-card {
+    background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 28px;
+    padding: 3rem 2.5rem;
+    width: 100%; max-width: 420px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.09);
+  }
+  .app-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 2.4rem; font-weight: 700;
+    color: var(--accent); letter-spacing: -1px;
+    margin-bottom: 0.3rem;
+  }
+  .app-sub { color: var(--text2); font-size: 0.9rem; margin-bottom: 2.5rem; }
+  .entry-btns { display: flex; flex-direction: column; gap: 14px; }
+  .entry-btn {
+    width: 100%; padding: 1.1rem;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    font-size: 1.05rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .entry-btn-teacher {
+    background: var(--accent); color: #fff;
+  }
+  .entry-btn-teacher:hover { background: #c73652; transform: translateY(-1px); }
+  .entry-btn-student {
+    background: transparent; color: var(--accent2);
+    border-color: rgba(15,52,96,0.2);
+  }
+  .entry-btn-student:hover { border-color: var(--accent2); background: rgba(15,52,96,0.04); }
+
+  /* ── TEACHER SETUP (방 만들기 / 입장) ── */
+  #screen-teacher-setup {
+    min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .setup-card {
     background: var(--surface);
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 24px;
-    padding: 3rem 2.5rem;
-    width: 100%; max-width: 440px;
-    text-align: center;
+    padding: 2.5rem 2.5rem;
+    width: 100%; max-width: 460px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.08);
   }
-  .lobby-title {
+  .setup-title {
     font-family: 'Gmarket Sans', sans-serif;
-    font-size: 2.2rem; font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -1px;
-    margin-bottom: 0.4rem;
+    font-size: 1.5rem; font-weight: 700; color: var(--text);
+    margin-bottom: 0.3rem;
   }
-  .lobby-sub { color: var(--text2); font-size: 0.9rem; margin-bottom: 2rem; }
-  .role-btns { display: flex; gap: 12px; margin-bottom: 1.5rem; }
-  .role-btn {
-    flex: 1; padding: 0.9rem;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid rgba(0,0,0,0.1);
+  .setup-sub { color: var(--text2); font-size: 0.85rem; margin-bottom: 1.8rem; }
+  .tab-btns { display: flex; gap: 0; margin-bottom: 1.8rem; border-radius: var(--radius-sm); overflow: hidden; border: 1.5px solid rgba(0,0,0,0.1); }
+  .tab-btn {
+    flex: 1; padding: 0.7rem;
     background: transparent; color: var(--text2);
-    cursor: pointer; font-size: 0.95rem; font-family: inherit;
-    transition: all .2s;
+    border: none; font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; transition: all .2s; font-weight: 500;
   }
-  .role-btn.selected, .role-btn:hover {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(233,69,96,0.08);
+  .tab-btn.active { background: var(--accent); color: #fff; font-weight: 700; }
+
+  /* ── STUDENT JOIN ── */
+  #screen-student-join {
+    min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;
   }
+
+  /* ── ROOM LIST (선생님용) ── */
+  .room-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; max-height: 260px; overflow-y: auto; }
+  .room-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.9rem 1.1rem;
+    background: #f7f8fa;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: var(--radius-sm);
+    cursor: pointer; transition: all .2s;
+  }
+  .room-item:hover { border-color: var(--accent); background: rgba(233,69,96,0.04); }
+  .room-item.expired { opacity: 0.5; cursor: not-allowed; }
+  .room-code-badge {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--accent);
+    background: rgba(233,69,96,0.1); border-radius: 8px;
+    padding: 4px 10px; flex-shrink: 0; letter-spacing: 2px;
+  }
+  .room-info { flex: 1; }
+  .room-name { font-weight: 700; font-size: 0.95rem; }
+  .room-meta { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .room-status-badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 99px;
+    background: rgba(22,163,74,0.1); border: 1px solid #16a34a; color: #15803d;
+  }
+  .room-status-badge.expired { background: #f3f4f6; border-color: #d1d5db; color: #9ca3af; }
+
+  /* ── QR MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
+    text-align: center;
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .modal-title { font-family: 'Gmarket Sans', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .modal-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
+  .qr-code-area {
+    background: #fff; border: 2px solid rgba(0,0,0,0.08);
+    border-radius: var(--radius); padding: 1rem;
+    margin: 0 auto 1.5rem; display: inline-block;
+  }
+  .room-code-big {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 2.8rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 6px; margin-bottom: 0.3rem;
+  }
+  .room-url-small { font-size: 0.75rem; color: var(--text2); word-break: break-all; margin-bottom: 1.5rem; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  .modal-title-sub { font-size: 0.78rem; font-weight: 700; letter-spacing: 1.5px; color: var(--text2); text-transform: uppercase; margin-bottom: 1rem; }
+
+  /* password modal */
+  .pw-modal-card {
+    background: var(--surface); border-radius: 20px; padding: 2.5rem;
+    width: 100%; max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .pw-modal-card .modal-title { text-align: left; }
+  .pw-modal-card .modal-sub { text-align: left; }
+
+  /* ── INPUT / BUTTON SYSTEM ── */
   .input-field {
     width: 100%; padding: 0.85rem 1rem;
     background: #f7f8fa;
@@ -85,29 +193,71 @@
     margin-bottom: 1rem;
   }
   .input-field:focus { border-color: var(--accent); }
+  .input-field.error-field { border-color: #ff6b6b; }
+  .code-input {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 2rem; font-weight: 700; letter-spacing: 8px;
+    text-align: center; text-transform: uppercase;
+    padding: 1rem;
+  }
   .btn-primary {
     width: 100%; padding: 0.9rem;
     background: var(--accent); color: #fff;
     border: none; border-radius: var(--radius-sm);
     font-size: 1rem; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-    letter-spacing: 0.5px;
+    cursor: pointer; transition: all .2s; letter-spacing: 0.5px;
   }
   .btn-primary:hover { background: #c73652; transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    padding: 0.7rem 1.4rem;
+    background: transparent;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 0.88rem; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-icon {
+    padding: 0.5rem 0.9rem;
+    background: transparent; border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: var(--radius-sm); cursor: pointer; font-size: 1rem;
+    transition: all .2s;
+  }
+  .btn-icon:hover { border-color: var(--accent); background: rgba(233,69,96,0.06); }
+  .btn-danger {
+    padding: 0.7rem 1.4rem;
+    background: #fee2e2; color: #dc2626;
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-reset-game {
+    padding: 0.7rem 1.4rem;
+    background: #fff7ed; color: #ea580c;
+    border: 1.5px solid #fdba74;
+    border-radius: var(--radius-sm); font-size: 0.88rem; font-family: inherit;
+    cursor: pointer; transition: all .2s; font-weight: 700;
+  }
+  .btn-reset-game:hover { background: #ffedd5; }
 
-  /* ── TEACHER SCREEN ── */
+  /* ── TEACHER DASHBOARD ── */
   #screen-teacher {
-    min-height: 100vh; padding: 1.5rem;
-    gap: 1.5rem;
+    min-height: 100vh; padding: 1.5rem; gap: 1.5rem;
   }
   .top-bar {
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
   }
-  .top-title {
+  .top-title { font-family: 'Gmarket Sans', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .top-room-code {
     font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.4rem; font-weight: 700; color: var(--accent);
+    font-size: 1.1rem; font-weight: 700; color: var(--accent2);
+    background: rgba(15,52,96,0.07); border-radius: 8px; padding: 4px 12px;
+    letter-spacing: 2px; cursor: pointer;
+    border: 1.5px solid rgba(15,52,96,0.15); transition: all .2s;
   }
+  .top-room-code:hover { background: rgba(15,52,96,0.12); }
   .badge {
     background: rgba(233,69,96,0.15); border: 1px solid var(--accent);
     color: var(--accent); padding: 4px 14px; border-radius: 99px; font-size: 0.78rem;
@@ -122,241 +272,42 @@
   }
   .question-type-btns { display: flex; gap: 10px; margin-bottom: 1rem; }
   .qtype-btn {
-    flex: 1; padding: 0.7rem;
-    border-radius: var(--radius-sm);
+    flex: 1; padding: 0.7rem; border-radius: var(--radius-sm);
     border: 1.5px solid rgba(0,0,0,0.1);
     background: transparent; color: var(--text2);
-    cursor: pointer; font-size: 0.88rem; font-family: inherit;
-    transition: all .2s;
+    cursor: pointer; font-size: 0.88rem; font-family: inherit; transition: all .2s;
   }
-  .qtype-btn.selected {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(233,69,96,0.08);
-  }
+  .qtype-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,0.08); }
   textarea.input-field { height: 80px; resize: vertical; }
-  .btn-secondary {
-    padding: 0.7rem 1.4rem;
-    background: transparent;
-    border: 1.5px solid rgba(0,0,0,0.12);
-    border-radius: var(--radius-sm);
-    color: var(--text); font-size: 0.88rem; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-  }
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* BUBBLES */
-  .bubbles-area {
-    flex: 1; min-height: 280px;
-    display: flex; flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 14px; padding: 1rem;
-    background: #f7f8fa;
-    border: 1px solid rgba(0,0,0,0.07);
-    border-radius: var(--radius);
-    overflow-y: auto;
-  }
-  .bubble {
-    padding: 12px 18px;
-    border-radius: 20px 20px 20px 4px;
-    max-width: 220px;
-    border: 1.5px solid;
-    animation: bubblePop .4s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes bubblePop {
-    from { transform: scale(0.5); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
-  .bubble-text { font-size: 0.88rem; line-height: 1.4; margin-bottom: 6px; }
-  .bubble-time { font-size: 0.7rem; opacity: 0.65; }
-
-  /* STUDENTS LIST */
   .students-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .student-chip {
     padding: 5px 14px; border-radius: 99px;
-    background: #f0f2f5;
-    border: 1px solid rgba(0,0,0,0.08);
-    font-size: 0.82rem; color: var(--text2);
-    transition: all .3s;
+    background: #f0f2f5; border: 1px solid rgba(0,0,0,0.08);
+    font-size: 0.82rem; color: var(--text2); transition: all .3s;
   }
-  .student-chip.done {
-    background: rgba(233,69,96,0.08);
-    border-color: var(--accent); color: var(--accent);
-  }
-
-  /* RESULT / RANKING */
-  #screen-result {
-    min-height: 100vh; padding: 2rem;
-    align-items: center; justify-content: flex-start; flex-direction: column;
-    gap: 2rem;
-  }
-  .podium {
-    display: flex; align-items: flex-end; justify-content: center;
-    gap: 16px; width: 100%; max-width: 600px;
-  }
-  .podium-item {
-    flex: 1; text-align: center;
-    display: flex; flex-direction: column; align-items: center;
-    gap: 8px;
-  }
-  .podium-avatar {
-    width: 64px; height: 64px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.6rem; font-weight: 700;
-    border: 3px solid;
-  }
-  .podium-block {
-    width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.8rem; font-weight: 700; color: rgba(0,0,0,0.4);
-  }
-  .podium-name { font-size: 0.9rem; font-weight: 700; }
-  .podium-time { font-size: 0.78rem; color: var(--text2); }
-
-  .rank-list { width: 100%; max-width: 560px; }
-  .rank-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 0.85rem 1.2rem;
-    background: var(--surface);
-    border: 1px solid rgba(0,0,0,0.07);
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-    animation: slideIn .3s ease both;
-  }
-  @keyframes slideIn {
-    from { transform: translateX(-20px); opacity: 0; }
-    to   { transform: translateX(0);     opacity: 1; }
-  }
-  .rank-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.8rem; font-weight: 700;
-    background: #f0f2f5; color: var(--text2);
-    flex-shrink: 0;
-  }
-  .rank-num.r1 { background: #f0a500; color: #fff; }
-  .rank-num.r2 { background: #9ca3af; color: #fff; }
-  .rank-num.r3 { background: #cd7f32; color: #fff; }
-  .rank-name { flex: 1; font-weight: 500; }
-  .rank-time { font-size: 0.82rem; color: var(--text2); }
-  .rank-score { font-size: 0.78rem; color: var(--accent); }
-
-  /* STUDENT SCREEN */
-  #screen-student {
-    min-height: 100vh; padding: 2rem;
-    align-items: center; justify-content: center;
-  }
-  .student-card {
-    width: 100%; max-width: 560px;
-    background: var(--surface);
-    border: 1px solid rgba(0,0,0,0.07);
-    border-radius: 24px;
-    padding: 2.5rem;
-    display: flex; flex-direction: column; gap: 1.2rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-  }
-  .prompt-box {
-    background: rgba(233,69,96,0.07);
-    border: 1.5px solid rgba(233,69,96,0.25);
-    border-radius: var(--radius-sm);
-    padding: 1.2rem 1.4rem;
-    font-size: 1.15rem; line-height: 1.7;
-    color: var(--text); min-height: 64px;
-  }
-  .typing-input {
-    width: 100%; padding: 1rem 1.2rem;
-    background: #f7f8fa;
-    border: 2px solid rgba(0,0,0,0.1);
-    border-radius: var(--radius-sm);
-    color: var(--text); font-size: 1.05rem; font-family: inherit;
-    outline: none; transition: border .2s;
-    resize: none; height: 80px;
-  }
-  .typing-input:focus { border-color: var(--accent); }
-  .typing-input.error { border-color: #ff6b6b; background: rgba(255,107,107,0.06); }
-  .typing-input:disabled { opacity: 0.5; cursor: not-allowed; }
-  .status-bar {
-    display: flex; align-items: center; gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .timer {
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.8rem; font-weight: 700; color: var(--accent);
-    min-width: 80px;
-  }
-  .wpm-badge {
-    padding: 4px 14px; border-radius: 99px;
-    background: #f0f2f5;
-    font-size: 0.82rem; color: var(--text2);
-  }
-  .waiting-msg {
-    text-align: center; color: var(--text2); font-size: 0.95rem;
-    padding: 2rem;
-  }
-  .waiting-dot {
-    display: inline-block; animation: blink 1.2s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-  /* FINAL RESULT */
-  #screen-final {
-    min-height: 100vh; padding: 2rem;
-    align-items: center; flex-direction: column; gap: 2rem;
-  }
-  .final-title {
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 2rem; font-weight: 700; text-align: center;
-    color: #f0a500;
-  }
-  .game-history { width: 100%; max-width: 600px; }
-  .history-item {
-    background: var(--surface);
-    border: 1px solid rgba(0,0,0,0.07);
-    border-radius: var(--radius-sm);
-    padding: 0.8rem 1.2rem;
-    margin-bottom: 8px;
-    font-size: 0.88rem; color: var(--text2);
-  }
-  .history-item strong { color: var(--text); }
-
-  /* UTIL */
+  .student-chip.done { background: rgba(233,69,96,0.08); border-color: var(--accent); color: var(--accent); }
   .flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .grow { flex: 1; }
-  .hidden { display: none !important; }
-  .mt { margin-top: 1rem; }
-  .center { text-align: center; }
-  .small { font-size: 0.82rem; color: var(--text2); }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
-  /* ── LIVE BUBBLE SCREEN (선생님 게임 진행 화면) ── */
+  /* ── LIVE BUBBLE SCREEN ── */
   #screen-live {
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-    background: var(--bg);
+    min-height: 100vh; position: relative; overflow: hidden; background: var(--bg);
   }
   .live-header {
     position: relative; z-index: 10;
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.2rem 1.5rem;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0,0,0,0.07);
-    flex-wrap: wrap; gap: 0.8rem;
+    background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.07); flex-wrap: wrap; gap: 0.8rem;
   }
   .live-question-box {
-    position: absolute;
-    top: 50%; left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 5;
-    text-align: center;
-    padding: 2rem 3rem;
-    max-width: 700px; width: 90%;
-    pointer-events: none;
+    z-index: 20; text-align: center; padding: 2rem 3rem;
+    max-width: 700px; width: 90%; pointer-events: none;
+    background: rgba(247,248,250,0.82); backdrop-filter: blur(10px);
+    border-radius: 24px; border: 1.5px solid rgba(233,69,96,0.15);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
   }
   .live-question-label {
     font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
@@ -364,127 +315,187 @@
   }
   .live-question-text {
     font-family: 'Gmarket Sans', sans-serif;
-    font-size: clamp(1.6rem, 4vw, 3rem);
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.35;
+    font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 700;
+    color: var(--text); line-height: 1.35;
     text-shadow: 0 2px 20px rgba(0,0,0,0.08);
   }
-  .live-submit-count {
-    font-size: 0.9rem; color: var(--accent); font-weight: 700;
-  }
-  /* floating bubbles */
+  .live-submit-count { font-size: 0.9rem; color: var(--accent); font-weight: 700; }
   .float-bubble {
-    position: absolute;
-    padding: 12px 18px;
-    border-radius: 20px 20px 20px 4px;
-    border: 1.5px solid;
-    max-width: 240px;
-    min-width: 140px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    cursor: default;
-    z-index: 8;
-    animation: floatIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
-    transition: transform 0.2s;
+    position: absolute; padding: 12px 18px;
+    border-radius: 20px 20px 20px 4px; border: 1.5px solid;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); cursor: default; z-index: 8;
+    animation: floatIn 0.5s cubic-bezier(.34,1.56,.64,1) both; transition: transform 0.2s;
   }
   .float-bubble:hover { transform: scale(1.04) translateY(-2px); }
   @keyframes floatIn {
     from { transform: scale(0.4) translateY(20px); opacity: 0; }
     to   { transform: scale(1)   translateY(0);    opacity: 1; }
   }
-  .float-bubble .bubble-name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
-  .float-bubble .bubble-text { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
-  .float-bubble .bubble-time { font-size: 0.7rem; opacity: 0.65; }
+  .float-bubble .bubble-name { font-weight: 700; margin-bottom: 4px; opacity: 0.75; }
+  .float-bubble .bubble-text { line-height: 1.4; margin-bottom: 6px; }
+  .float-bubble .bubble-time { opacity: 0.65; }
 
-  /* ── PASSWORD MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 1000;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(4px);
-    align-items: center; justify-content: center;
+  /* ── STUDENT SCREEN ── */
+  #screen-student {
+    min-height: 100vh; padding: 2rem; align-items: center; justify-content: center;
   }
-  .modal-overlay.open { display: flex; }
-  .modal-card {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 2.5rem;
-    width: 100%; max-width: 380px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  .student-card {
+    width: 100%; max-width: 560px; background: var(--surface);
+    border: 1px solid rgba(0,0,0,0.07); border-radius: 24px; padding: 2.5rem;
+    display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
   }
-  @keyframes modalIn {
-    from { transform: scale(0.85); opacity: 0; }
-    to   { transform: scale(1);    opacity: 1; }
+  .prompt-box {
+    background: rgba(233,69,96,0.07); border: 1.5px solid rgba(233,69,96,0.25);
+    border-radius: var(--radius-sm); padding: 1.2rem 1.4rem;
+    font-size: 1.15rem; line-height: 1.7; color: var(--text); min-height: 64px;
   }
-  .modal-title {
-    font-family: 'Gmarket Sans', sans-serif;
-    font-size: 1.3rem; font-weight: 700; color: var(--text);
-    margin-bottom: 0.4rem;
+  .typing-input {
+    width: 100%; padding: 1rem 1.2rem; background: #f7f8fa;
+    border: 2px solid rgba(0,0,0,0.1); border-radius: var(--radius-sm);
+    color: var(--text); font-size: 1.05rem; font-family: inherit;
+    outline: none; transition: border .2s; resize: none; height: 80px;
   }
-  .modal-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 1.5rem; }
-  .modal-btns { display: flex; gap: 10px; margin-top: 1rem; }
-  .btn-danger {
-    padding: 0.7rem 1.4rem;
-    background: #fee2e2; color: #dc2626;
-    border: 1.5px solid #fca5a5;
-    border-radius: var(--radius-sm);
-    font-size: 0.9rem; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-  }
-  .btn-danger:hover { background: #fecaca; }
+  .typing-input:focus { border-color: var(--accent); }
+  .typing-input.error { border-color: #ff6b6b; background: rgba(255,107,107,0.06); }
+  .typing-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .timer { font-family: 'Gmarket Sans', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--accent); min-width: 80px; }
+  .wpm-badge { padding: 4px 14px; border-radius: 99px; background: #f0f2f5; font-size: 0.82rem; color: var(--text2); }
+  .waiting-msg { text-align: center; color: var(--text2); font-size: 0.95rem; padding: 2rem; }
+  .waiting-dot { display: inline-block; animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-  /* ── RESET GAME BUTTON style ── */
-  .btn-reset-game {
-    padding: 0.7rem 1.4rem;
-    background: #fff7ed; color: #ea580c;
-    border: 1.5px solid #fdba74;
-    border-radius: var(--radius-sm);
-    font-size: 0.88rem; font-family: inherit;
-    cursor: pointer; transition: all .2s; font-weight: 700;
+  /* ── RESULT SCREENS ── */
+  #screen-result {
+    min-height: 100vh; padding: 2rem; align-items: center; justify-content: flex-start;
+    flex-direction: column; gap: 2rem;
   }
-  .btn-reset-game:hover { background: #ffedd5; }
+  #screen-final {
+    min-height: 100vh; padding: 2rem; align-items: center; flex-direction: column; gap: 2rem;
+  }
+  .podium {
+    display: flex; align-items: flex-end; justify-content: center; gap: 16px;
+    width: 100%; max-width: 600px;
+  }
+  .podium-item { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .podium-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Gmarket Sans', sans-serif; font-size: 1.6rem; font-weight: 700; border: 3px solid; }
+  .podium-block { width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0; display: flex; align-items: center; justify-content: center; font-family: 'Gmarket Sans', sans-serif; font-size: 1.8rem; font-weight: 700; color: rgba(0,0,0,0.4); }
+  .podium-name { font-size: 0.9rem; font-weight: 700; }
+  .podium-time { font-size: 0.78rem; color: var(--text2); }
+  .rank-list { width: 100%; max-width: 560px; }
+  .rank-item {
+    display: flex; align-items: center; gap: 14px; padding: 0.85rem 1.2rem;
+    background: var(--surface); border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-sm);
+    margin-bottom: 8px; animation: slideIn .3s ease both;
+  }
+  @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .rank-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; background: #f0f2f5; color: var(--text2); flex-shrink: 0; }
+  .rank-num.r1 { background: #f0a500; color: #fff; }
+  .rank-num.r2 { background: #9ca3af; color: #fff; }
+  .rank-num.r3 { background: #cd7f32; color: #fff; }
+  .rank-name { flex: 1; font-weight: 500; }
+  .rank-time { font-size: 0.82rem; color: var(--text2); }
+  .rank-score { font-size: 0.78rem; color: var(--accent); }
+  .final-title { font-family: 'Gmarket Sans', sans-serif; font-size: 2rem; font-weight: 700; text-align: center; color: #f0a500; }
+  .game-history { width: 100%; max-width: 600px; }
+  .history-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; margin-bottom: 8px; font-size: 0.88rem; color: var(--text2); }
+  .history-item strong { color: var(--text); }
+
+  /* ── UTIL ── */
+  .hidden { display: none !important; }
+  .mt { margin-top: 1rem; }
+  .center { text-align: center; }
+  .small { font-size: 0.82rem; color: var(--text2); }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOBBY ══════════ -->
-<div id="screen-lobby" class="screen active">
-  <div class="lobby-card">
-    <div class="lobby-title">⌨️ 타자 교실</div>
-    <div class="lobby-sub">실시간 타자 연습 게임</div>
-    <div class="role-btns">
-      <button class="role-btn selected" id="role-student" onclick="selectRole('student')">🙋 학생</button>
-      <button class="role-btn" id="role-teacher" onclick="selectRole('teacher')">👩‍🏫 선생님</button>
+<!-- ══════════ HOME ══════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-card" style="margin:auto;">
+    <div class="app-title">⌨️ 타자 교실</div>
+    <div class="app-sub">실시간 교실 타자 게임</div>
+    <div class="entry-btns">
+      <button class="entry-btn entry-btn-teacher" onclick="showScreen('teacher-setup')">
+        👩‍🏫 선생님으로 시작
+      </button>
+      <button class="entry-btn entry-btn-student" onclick="showScreen('student-join')">
+        🙋 학생으로 입장
+      </button>
     </div>
-    <input class="input-field" id="lobby-name" placeholder="이름을 입력하세요" maxlength="12" />
-    <div id="teacher-pw-wrap" class="hidden">
-      <input class="input-field" id="lobby-pw" type="password" placeholder="선생님 비밀번호 (기본: 1234)" />
-    </div>
-    <button class="btn-primary" id="lobby-enter-btn" onclick="enterRoom()">입장하기</button>
-    <div class="small mt center" id="lobby-error"></div>
   </div>
 </div>
 
-<!-- ══════════ TEACHER ══════════ -->
+<!-- ══════════ TEACHER SETUP ══════════ -->
+<div id="screen-teacher-setup" class="screen">
+  <div class="setup-card" style="margin:auto;">
+    <button class="btn-icon" style="margin-bottom:1.2rem;" onclick="showScreen('home')">← 돌아가기</button>
+    <div class="setup-title">👩‍🏫 선생님 메뉴</div>
+    <div class="setup-sub">새 방을 만들거나 기존 방에 입장하세요.</div>
+
+    <div class="tab-btns">
+      <button class="tab-btn active" id="tab-create" onclick="switchTab('create')">새 방 만들기</button>
+      <button class="tab-btn" id="tab-enter" onclick="switchTab('enter')">기존 방 입장</button>
+    </div>
+
+    <!-- 새 방 만들기 -->
+    <div id="tab-create-content">
+      <input class="input-field" id="create-name" placeholder="선생님 이름" maxlength="12" />
+      <input class="input-field" id="create-room-name" placeholder="방 이름 (예: 3학년2반)" maxlength="20" />
+      <input class="input-field" id="create-pw" type="password" placeholder="방 비밀번호 (기본: 1234)" maxlength="20" />
+      <button class="btn-primary" onclick="createRoom()">🏫 새 방 만들기</button>
+      <div class="small mt center" id="create-error" style="color:#ff6b6b;min-height:18px;"></div>
+    </div>
+
+    <!-- 기존 방 입장 -->
+    <div id="tab-enter-content" class="hidden">
+      <input class="input-field code-input" id="enter-room-code" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase()" />
+      <input class="input-field" id="enter-name" placeholder="선생님 이름" maxlength="12" />
+      <input class="input-field" id="enter-pw" type="password" placeholder="방 비밀번호" />
+      <button class="btn-primary" onclick="enterExistingRoom()">입장하기</button>
+      <div class="small mt center" id="enter-error" style="color:#ff6b6b;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STUDENT JOIN ══════════ -->
+<div id="screen-student-join" class="screen">
+  <div class="setup-card" style="margin:auto;">
+    <button class="btn-icon" style="margin-bottom:1.2rem;" onclick="showScreen('home')">← 돌아가기</button>
+    <div class="setup-title">🙋 학생 입장</div>
+    <div class="setup-sub">선생님에게 받은 방 코드를 입력하세요.</div>
+    <input class="input-field code-input" id="student-room-code" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase()" />
+    <input class="input-field" id="student-name-input" placeholder="내 이름" maxlength="12" />
+    <button class="btn-primary" onclick="joinRoom()">입장하기 →</button>
+    <div class="small mt center" id="student-join-error" style="color:#ff6b6b;min-height:18px;"></div>
+  </div>
+</div>
+
+<!-- ══════════ TEACHER DASHBOARD ══════════ -->
 <div id="screen-teacher" class="screen">
   <div class="top-bar">
-    <div class="top-title">👩‍🏫 선생님 대시보드</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="top-title">👩‍🏫 선생님 대시보드</div>
+      <div class="top-room-code" id="top-room-code-badge" onclick="openQrModal()" title="클릭하여 QR 보기">📋 ------</div>
+    </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <span class="badge" id="student-count-badge">학생 0명</span>
-      <button class="btn-secondary" onclick="openPwModal()">🔑 비밀번호 변경</button>
+      <button class="btn-secondary" onclick="openQrModal()">📱 QR 코드</button>
+      <button class="btn-secondary" onclick="openPwModal()">🔑 비밀번호</button>
       <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
       <button class="btn-secondary" onclick="resetGame()" id="reset-btn" style="display:none">🔄 새 문제</button>
     </div>
   </div>
 
-  <!-- 학생 현황 -->
   <div class="panel">
     <div class="panel-title">접속 중인 학생</div>
     <div class="students-list" id="students-list"></div>
   </div>
 
-  <!-- 출제 패널 -->
   <div class="panel" id="question-panel">
     <div class="panel-title">문제 출제</div>
     <div class="question-type-btns">
@@ -497,11 +508,10 @@
     </div>
   </div>
 
-  <!-- 버블 영역 — 이제 별도 screen-live로 이동, 여기선 숨김 -->
   <div id="bubble-panel" style="display:none"></div>
 </div>
 
-<!-- ══════════ LIVE BUBBLE SCREEN (선생님 게임 진행) ══════════ -->
+<!-- ══════════ LIVE BUBBLE SCREEN ══════════ -->
 <div id="screen-live" class="screen">
   <div class="live-header">
     <div style="display:flex;align-items:center;gap:12px;">
@@ -516,28 +526,22 @@
       <button class="btn-primary" style="width:auto;padding:0.6rem 1.4rem;" onclick="showRoundResult()">📊 결과 보기</button>
     </div>
   </div>
-
-  <!-- 중앙 질문 표시 -->
-  <div class="live-question-box">
+  <div class="live-question-box" id="live-question-box">
     <div class="live-question-label" id="live-qtype-label"></div>
     <div class="live-question-text" id="live-question-text"></div>
   </div>
-
-  <!-- 떠다니는 버블들이 여기에 렌더링됨 (JS로 position:absolute) -->
 </div>
 
-<!-- ══════════ STUDENT ══════════ -->
+<!-- ══════════ STUDENT GAME SCREEN ══════════ -->
 <div id="screen-student" class="screen">
   <div class="student-card">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.1rem;font-weight:700;">⌨️ 타자 교실</div>
       <span class="badge" id="student-name-badge"></span>
     </div>
-
     <div id="student-waiting" class="waiting-msg">
       선생님의 문제를 기다리는 중<span class="waiting-dot">...</span>
     </div>
-
     <div id="student-game" class="hidden">
       <div class="small" id="game-type-label" style="margin-bottom:0.5rem;"></div>
       <div class="prompt-box" id="student-prompt"></div>
@@ -546,19 +550,14 @@
         <div class="wpm-badge" id="wpm-display">-- 타/분</div>
         <div class="wpm-badge" id="char-count">0자</div>
       </div>
-      <textarea class="typing-input" id="typing-input"
-        placeholder="여기에 입력하세요..."
-        oninput="onTypingInput()"
-        onkeydown="onTypingKeydown(event)"></textarea>
+      <textarea class="typing-input" id="typing-input" placeholder="여기에 입력하세요..."
+        oninput="onTypingInput()" onkeydown="onTypingKeydown(event)"></textarea>
       <div id="error-msg" class="small" style="color:#ff6b6b;min-height:18px;"></div>
       <button class="btn-primary" id="submit-btn" onclick="submitAnswer()">제출하기 ↵</button>
     </div>
-
     <div id="student-done" class="hidden waiting-msg">
       ✅ 제출 완료! 다른 친구들을 기다리는 중<span class="waiting-dot">...</span>
     </div>
-
-    <!-- 학생 결과 화면 -->
     <div id="student-result" class="hidden" style="display:none;flex-direction:column;gap:1rem;">
       <div id="student-congrats" style="display:none;text-align:center;padding:1.2rem;border-radius:var(--radius);font-family:'Gmarket Sans',sans-serif;font-size:1.5rem;font-weight:700;"></div>
       <div id="my-rank-highlight" style="text-align:center;padding:1.5rem;background:#f7f8fa;border-radius:var(--radius);border:2px solid var(--accent);">
@@ -570,56 +569,73 @@
       <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-top:0.5rem;">전체 순위</div>
       <div id="student-rank-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
+  </div>
+</div>
 
-  </div><!-- end student-card -->
-</div><!-- end screen-student -->
-
-<!-- ══════════ RESULT (ROUND) ══════════ -->
+<!-- ══════════ ROUND RESULT ══════════ -->
 <div id="screen-result" class="screen">
-  <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;">
+  <div style="font-family:'Gmarket Sans',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;padding-top:2rem;">
     🏅 라운드 결과
   </div>
   <div class="podium" id="podium"></div>
   <div class="rank-list" id="rank-list"></div>
-  <div class="flex-row" style="justify-content:center;gap:12px;" id="result-btns">
+  <div class="flex-row" style="justify-content:center;gap:12px;padding-bottom:2rem;">
     <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
-    <button class="btn-primary" id="next-round-btn" onclick="nextRound()" style="display:none">다음 문제 ▶</button>
+    <button class="btn-primary" id="next-round-btn" onclick="nextRound()" style="display:none;width:auto;">다음 문제 ▶</button>
   </div>
 </div>
 
 <!-- ══════════ FINAL RESULT ══════════ -->
 <div id="screen-final" class="screen">
-  <div class="final-title">🏆 최종 순위</div>
+  <div class="final-title" style="padding-top:2rem;">🏆 최종 순위</div>
   <div class="podium" id="final-podium"></div>
   <div class="rank-list" id="final-rank-list"></div>
   <div class="game-history" id="game-history"></div>
-  <div class="flex-row" style="justify-content:center;margin-bottom:2rem;">
+  <div class="flex-row" style="justify-content:center;padding-bottom:2rem;">
     <button class="btn-secondary" onclick="goBackToResult()">← 돌아가기</button>
-    <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none">새 게임 시작 ▶</button>
-    <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화 &amp; 새 게임</button>
+    <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none;width:auto;">새 게임 시작 ▶</button>
+    <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화</button>
+  </div>
+</div>
+
+<!-- ══════════ QR MODAL ══════════ -->
+<div class="modal-overlay" id="qr-modal">
+  <div class="modal-card">
+    <div class="modal-title">📱 학생 접속 코드</div>
+    <div class="modal-sub">아래 코드 또는 QR코드로 학생들을 초대하세요.</div>
+    <div class="room-code-big" id="qr-modal-code"></div>
+    <div class="room-url-small" id="qr-modal-url"></div>
+    <div class="qr-code-area">
+      <canvas id="qr-canvas" width="200" height="200"></canvas>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeQrModal()">닫기</button>
+      <button class="btn-primary" style="width:auto;" onclick="copyRoomLink()">🔗 링크 복사</button>
+    </div>
   </div>
 </div>
 
 <!-- ══════════ PASSWORD MODAL ══════════ -->
 <div class="modal-overlay" id="pw-modal">
-  <div class="modal-card">
+  <div class="pw-modal-card">
     <div class="modal-title">🔑 비밀번호 변경</div>
-    <div class="modal-sub">선생님 입장 비밀번호를 변경합니다.<br>변경 후 저장됩니다.</div>
+    <div class="modal-sub" style="margin-bottom:1.5rem;">방 입장 비밀번호를 변경합니다.</div>
     <input class="input-field" id="pw-current" type="password" placeholder="현재 비밀번호" />
     <input class="input-field" id="pw-new" type="password" placeholder="새 비밀번호 (4자 이상)" />
     <input class="input-field" id="pw-confirm" type="password" placeholder="새 비밀번호 확인" />
     <div id="pw-error" class="small" style="color:#ff6b6b;min-height:18px;"></div>
-    <div class="modal-btns">
+    <div class="modal-btns" style="justify-content:flex-start;">
       <button class="btn-secondary grow" onclick="closePwModal()">취소</button>
       <button class="btn-primary grow" onclick="changePassword()" style="width:auto;">변경하기</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase + QRCode.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, update, remove, off }
+import { getDatabase, ref, set, get, push, onValue, update, remove }
   from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -635,17 +651,17 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // ── STATE ──
-let myRole = 'student';
+let myRole = '';
 let myName = '';
 let myId = '';
+let roomCode = '';          // 현재 방 코드 (대문자 6자리)
 let currentQtype = 'copy';
 let timerInterval = null;
 let startTime = null;
 let roundActive = false;
 let prevScreen = 'result';
-let renderedBubbleIds = new Set(); // 이미 렌더링된 버블 추적
+let renderedBubbleIds = new Set();
 
-// BUBBLE COLORS (vivid, light-mode friendly)
 const BUBBLE_COLORS = [
   { bg: 'rgba(233,69,96,0.10)',  border: '#e94560', text: '#c0283e' },
   { bg: 'rgba(37,99,235,0.10)',  border: '#2563eb', text: '#1d4ed8' },
@@ -660,34 +676,85 @@ const BUBBLE_COLORS = [
 ];
 function getColor(idx) { return BUBBLE_COLORS[idx % BUBBLE_COLORS.length]; }
 
+// ── ROOM PATH HELPER ──
+function rp(path) { return `rooms/${roomCode}/${path}`; }
+
 // ── HELPERS ──
-function showScreen(id) {
+window.showScreen = function(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
-}
+};
 function fmtTime(ms) {
   if (ms < 60000) return (ms/1000).toFixed(2) + 's';
   return Math.floor(ms/60000) + 'm ' + ((ms%60000)/1000).toFixed(1) + 's';
 }
 function calcWPM(text, ms) {
-  const words = text.length / 5;
   const mins = ms / 60000;
-  return mins > 0 ? Math.round(words / mins) : 0;
+  return mins > 0 ? Math.round((text.length / 5) / mins) : 0;
+}
+function genRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-// ── ROLE SELECT ──
-window.selectRole = function(role) {
-  myRole = role;
-  document.getElementById('role-student').classList.toggle('selected', role === 'student');
-  document.getElementById('role-teacher').classList.toggle('selected', role === 'teacher');
-  document.getElementById('teacher-pw-wrap').classList.toggle('hidden', role !== 'teacher');
+// ── TAB SWITCH ──
+window.switchTab = function(tab) {
+  document.getElementById('tab-create').classList.toggle('active', tab === 'create');
+  document.getElementById('tab-enter').classList.toggle('active', tab === 'enter');
+  document.getElementById('tab-create-content').classList.toggle('hidden', tab !== 'create');
+  document.getElementById('tab-enter-content').classList.toggle('hidden', tab !== 'enter');
 };
 
-// ── QTYPE ──
-window.selectQtype = function(qt) {
-  currentQtype = qt;
-  document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
-  document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+// ── QR MODAL ──
+window.openQrModal = function() {
+  const url = window.location.href.split('?')[0] + '?room=' + roomCode;
+  document.getElementById('qr-modal-code').textContent = roomCode;
+  document.getElementById('qr-modal-url').textContent = url;
+
+  // QR 코드 생성
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 200, 200);
+
+  // QRCode.js 사용 (별도 div에 생성 후 canvas에 복사)
+  const tempDiv = document.createElement('div');
+  tempDiv.style.display = 'none';
+  document.body.appendChild(tempDiv);
+  try {
+    new QRCode(tempDiv, {
+      text: url,
+      width: 200, height: 200,
+      colorDark: '#1a1a2e', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    setTimeout(() => {
+      const img = tempDiv.querySelector('img');
+      if (img) {
+        const i = new Image();
+        i.onload = () => ctx.drawImage(i, 0, 0, 200, 200);
+        i.src = img.src;
+      }
+      document.body.removeChild(tempDiv);
+    }, 100);
+  } catch(e) {
+    document.body.removeChild(tempDiv);
+    // fallback: QR 라이브러리 없을 시 텍스트 표시
+    ctx.fillStyle = '#f7f8fa';
+    ctx.fillRect(0, 0, 200, 200);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('QR: ' + roomCode, 100, 100);
+  }
+
+  document.getElementById('qr-modal').classList.add('open');
+};
+window.closeQrModal = function() {
+  document.getElementById('qr-modal').classList.remove('open');
+};
+window.copyRoomLink = function() {
+  const url = window.location.href.split('?')[0] + '?room=' + roomCode;
+  navigator.clipboard.writeText(url).then(() => alert('✅ 링크가 복사되었습니다!\n' + url));
 };
 
 // ── PASSWORD MODAL ──
@@ -703,86 +770,168 @@ window.closePwModal = function() {
 };
 window.changePassword = async function() {
   const cur = document.getElementById('pw-current').value;
-  const nw = document.getElementById('pw-new').value;
-  const cf = document.getElementById('pw-confirm').value;
+  const nw  = document.getElementById('pw-new').value;
+  const cf  = document.getElementById('pw-confirm').value;
   const errEl = document.getElementById('pw-error');
   errEl.textContent = '';
-
-  // 현재 비밀번호 확인 (Firebase에서)
-  const snap = await get(ref(db, 'room/teacherPassword'));
+  const snap = await get(ref(db, rp('password')));
   const storedPw = snap.val() || '1234';
   if (cur !== storedPw) { errEl.textContent = '현재 비밀번호가 틀렸습니다.'; return; }
-  if (nw.length < 4) { errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.'; return; }
-  if (nw !== cf) { errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
-
-  await set(ref(db, 'room/teacherPassword'), nw);
+  if (nw.length < 4)    { errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.'; return; }
+  if (nw !== cf)        { errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+  await set(ref(db, rp('password')), nw);
   closePwModal();
   alert('✅ 비밀번호가 변경되었습니다.');
 };
 
-// ── FULL RESET (전체 초기화) ──
+// ── CREATE ROOM ──
+window.createRoom = async function() {
+  const name     = document.getElementById('create-name').value.trim();
+  const roomName = document.getElementById('create-room-name').value.trim();
+  const pw       = document.getElementById('create-pw').value || '1234';
+  const errEl    = document.getElementById('create-error');
+  errEl.textContent = '';
+  if (!name)     { errEl.textContent = '선생님 이름을 입력해주세요.'; return; }
+  if (!roomName) { errEl.textContent = '방 이름을 입력해주세요.'; return; }
+
+  // 코드 생성 (중복 확인)
+  let code, exists = true;
+  while (exists) {
+    code = genRoomCode();
+    const snap = await get(ref(db, `rooms/${code}`));
+    exists = snap.exists();
+  }
+
+  roomCode = code;
+  myName = name; myId = 'teacher';
+
+  await set(ref(db, `rooms/${roomCode}`), {
+    meta: { name: roomName, createdAt: Date.now(), teacherName: name },
+    password: pw,
+    teacher: { name, online: true },
+    round: { state: 'idle' }
+  });
+
+  initTeacherDashboard();
+};
+
+// ── ENTER EXISTING ROOM (teacher) ──
+window.enterExistingRoom = async function() {
+  const code  = document.getElementById('enter-room-code').value.trim().toUpperCase();
+  const name  = document.getElementById('enter-name').value.trim();
+  const pw    = document.getElementById('enter-pw').value;
+  const errEl = document.getElementById('enter-error');
+  errEl.textContent = '';
+  if (code.length !== 6) { errEl.textContent = '6자리 방 코드를 입력해주세요.'; return; }
+  if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
+
+  const snap = await get(ref(db, `rooms/${code}`));
+  if (!snap.exists()) { errEl.textContent = '존재하지 않는 방 코드입니다.'; return; }
+  const room = snap.val();
+  const storedPw = room.password || '1234';
+  if (pw !== storedPw) { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
+
+  // 만료 확인 (24시간)
+  const age = Date.now() - (room.meta?.createdAt || 0);
+  if (age > 86400000) { errEl.textContent = '⚠ 이 방은 만료되었습니다. 새 방을 만들어주세요.'; return; }
+
+  roomCode = code;
+  myName = name; myId = 'teacher';
+
+  // 선생님 재접속 → 학생 초기화
+  await remove(ref(db, rp('students')));
+  await remove(ref(db, rp('submissions')));
+  await set(ref(db, rp('round')), { state: 'idle' });
+  await set(ref(db, rp('teacher')), { name, online: true });
+
+  initTeacherDashboard();
+};
+
+// ── JOIN ROOM (student) ──
+window.joinRoom = async function() {
+  const code   = document.getElementById('student-room-code').value.trim().toUpperCase();
+  const name   = document.getElementById('student-name-input').value.trim();
+  const errEl  = document.getElementById('student-join-error');
+  errEl.textContent = '';
+  if (code.length !== 6) { errEl.textContent = '6자리 방 코드를 입력해주세요.'; return; }
+  if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
+
+  const snap = await get(ref(db, `rooms/${code}`));
+  if (!snap.exists()) { errEl.textContent = '존재하지 않는 방 코드입니다.'; return; }
+  const room = snap.val();
+
+  const age = Date.now() - (room.meta?.createdAt || 0);
+  if (age > 86400000) { errEl.textContent = '⚠ 이 방은 만료되었습니다.'; return; }
+
+  roomCode = code;
+  myName = name;
+  myId = 'student_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  myRole = 'student';
+
+  await set(ref(db, rp('students/' + myId)), { name, online: true, done: false });
+  document.getElementById('student-name-badge').textContent = name;
+  showScreen('student');
+  listenAsStudent();
+
+  window.addEventListener('beforeunload', () => {
+    remove(ref(db, rp('students/' + myId)));
+  });
+};
+
+// ── INIT TEACHER DASHBOARD ──
+function initTeacherDashboard() {
+  myRole = 'teacher';
+  document.getElementById('top-room-code-badge').textContent = '📋 ' + roomCode;
+  showScreen('teacher');
+  listenAsTeacher();
+
+  // URL에 방 코드 반영
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', roomCode);
+  window.history.replaceState({}, '', url);
+}
+
+// ── AUTO-JOIN FROM URL ──
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('room');
+  if (code) {
+    document.getElementById('student-room-code').value = code.toUpperCase();
+    showScreen('student-join');
+  }
+})();
+
+// ── QTYPE ──
+window.selectQtype = function(qt) {
+  currentQtype = qt;
+  document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
+  document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+};
+
+// ── FULL RESET ──
 window.fullResetGame = async function() {
   if (!confirm('⚠️ 모든 점수, 기록, 순위를 삭제하고 새 게임을 시작할까요?')) return;
-  await remove(ref(db, 'room/submissions'));
-  await remove(ref(db, 'room/roundResult'));
-  await remove(ref(db, 'room/history'));
-  await remove(ref(db, 'room/scores'));
-  // 학생 done 플래그 초기화
-  const snap = await get(ref(db, 'room/students'));
+  await remove(ref(db, rp('submissions')));
+  await remove(ref(db, rp('roundResult')));
+  await remove(ref(db, rp('history')));
+  await remove(ref(db, rp('scores')));
+  const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
-  await update(ref(db), updates);
-  await set(ref(db, 'room/round'), { state: 'idle' });
+  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
+  if (Object.keys(updates).length) await update(ref(db), updates);
+  await set(ref(db, rp('round')), { state: 'idle' });
   document.getElementById('question-text').value = '';
   showScreen('teacher');
 };
 
-// ── ENTER ──
-window.enterRoom = async function() {
-  const name = document.getElementById('lobby-name').value.trim();
-  const errEl = document.getElementById('lobby-error');
-  errEl.textContent = '';
-  if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
-
-  if (myRole === 'teacher') {
-    const pw = document.getElementById('lobby-pw').value || '1234';
-    // Firebase에 저장된 비밀번호 확인
-    const snap = await get(ref(db, 'room/teacherPassword'));
-    const storedPw = snap.val() || '1234';
-    if (pw !== storedPw) { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
-
-    myName = name; myId = 'teacher';
-    // 선생님 재접속 시 모든 학생 정보 삭제
-    await remove(ref(db, 'room/students'));
-    await remove(ref(db, 'room/submissions'));
-    await set(ref(db, 'room/round'), { state: 'idle' });
-    await set(ref(db, 'room/teacher'), { name, online: true });
-    showScreen('teacher');
-    listenAsTeacher();
-  } else {
-    myName = name;
-    myId = 'student_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-    await set(ref(db, 'room/students/' + myId), { name, online: true, done: false });
-    showScreen('student');
-    document.getElementById('student-name-badge').textContent = name;
-    listenAsStudent();
-    // cleanup on unload
-    window.addEventListener('beforeunload', () => {
-      remove(ref(db, 'room/students/' + myId));
-    });
-  }
-};
-
 // ── TEACHER LISTENERS ──
 function listenAsTeacher() {
-  // students — 두 badge 모두 업데이트
-  onValue(ref(db, 'room/students'), snap => {
+  onValue(ref(db, rp('students')), snap => {
     const students = snap.val() || {};
     const list = document.getElementById('students-list');
     list.innerHTML = '';
-    let count = 0;
-    let doneCount = 0;
+    let count = 0, doneCount = 0;
     Object.entries(students).forEach(([id, s]) => {
       if (!s.online) return;
       count++;
@@ -790,35 +939,47 @@ function listenAsTeacher() {
       const chip = document.createElement('div');
       chip.className = 'student-chip' + (s.done ? ' done' : '');
       chip.textContent = s.done ? '✓ ' + s.name : s.name;
-      chip.id = 'chip-' + id;
       list.appendChild(chip);
     });
     document.getElementById('student-count-badge').textContent = '학생 ' + count + '명';
     document.getElementById('live-student-badge').textContent = '학생 ' + count + '명';
-    // all-submitted notice (live screen)
     const noticeLive = document.getElementById('all-submitted-notice-live');
-    if (noticeLive) {
-      noticeLive.style.display = (count > 0 && doneCount === count) ? '' : 'none';
-    }
+    if (noticeLive) noticeLive.style.display = (count > 0 && doneCount === count) ? '' : 'none';
   });
 
-  // submissions → 플로팅 버블 (새 제출만 추가)
-  onValue(ref(db, 'room/submissions'), snap => {
+  onValue(ref(db, rp('submissions')), snap => {
     const subs = snap.val() || {};
     const entries = Object.values(subs);
     const liveScreen = document.getElementById('screen-live');
     const liveCount = document.getElementById('live-submit-count');
     if (liveCount) liveCount.textContent = entries.length + '명 제출';
 
-    // 이전 버블 모두 제거 후 전체 재렌더 (순서 유지)
-    liveScreen.querySelectorAll('.float-bubble').forEach(b => b.remove());
-    renderedBubbleIds.clear();
+    const studentBadgeText = document.getElementById('live-student-badge').textContent;
+    const totalStudents = parseInt(studentBadgeText) || Math.max(entries.length, 1);
 
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
-    const headerH = 80;
-    const margin = 20;
-    const bw = 220, bh = 110;
+    const headerH = 72;
+    const availW = screenW;
+    const availH = screenH - headerH;
+
+    const cols = Math.ceil(Math.sqrt(totalStudents * availW / availH));
+    const rows = Math.ceil(totalStudents / cols);
+    const cellW = availW / cols;
+    const cellH = availH / rows;
+    const bw = Math.min(280, Math.max(140, cellW * 0.85));
+    const bh = Math.min(160, Math.max(90,  cellH * 0.82));
+
+    const qBox = document.getElementById('live-question-box');
+    let qRect = { left: screenW*0.15, right: screenW*0.85, top: screenH*0.3, bottom: screenH*0.7 };
+    if (qBox) {
+      const r = qBox.getBoundingClientRect();
+      const pad = 24;
+      qRect = { left: r.left - pad, right: r.right + pad, top: r.top - pad, bottom: r.bottom + pad };
+    }
+    function overlapsCenter(x, y) {
+      return !(x + bw < qRect.left || x > qRect.right || y + bh < qRect.top || y > qRect.bottom);
+    }
 
     entries.forEach((sub, i) => {
       if (renderedBubbleIds.has(sub.uid)) return;
@@ -829,39 +990,43 @@ function listenAsTeacher() {
       div.style.background = c.bg;
       div.style.borderColor = c.border;
       div.style.color = c.text;
+      div.style.width = bw + 'px';
+      div.style.maxWidth = bw + 'px';
+      div.style.minWidth = '0';
+      const fScale = Math.min(1, bw / 220);
+      div.style.fontSize = (fScale * 14) + 'px';
 
-      // 랜덤 위치 (헤더 아래, 화면 안)
-      const maxX = Math.max(screenW - bw - margin, margin);
-      const maxY = Math.max(screenH - bh - margin, headerH + margin);
-      const rx = margin + Math.random() * (maxX - margin);
-      const ry = headerH + margin + Math.random() * (maxY - headerH - margin);
+      let rx, ry, attempts = 0;
+      const margin = 12;
+      do {
+        rx = margin + Math.random() * Math.max(0, screenW - bw - margin * 2);
+        ry = headerH + margin + Math.random() * Math.max(0, availH - bh - margin * 2);
+        attempts++;
+      } while (overlapsCenter(rx, ry) && attempts < 15);
+
       div.style.left = rx + 'px';
       div.style.top  = ry + 'px';
-
+      const wpm = calcWPM(sub.answer, sub.elapsed);
       div.innerHTML = `
-        <div class="bubble-name">${sub.name}</div>
-        <div class="bubble-text">${sub.answer}</div>
-        <div class="bubble-time">⏱ ${fmtTime(sub.elapsed)} · ${calcWPM(sub.answer, sub.elapsed)}타/분</div>`;
+        <div class="bubble-name" style="font-size:${fScale*11}px">${sub.name}</div>
+        <div class="bubble-text" style="font-size:${fScale*13}px">${sub.answer}</div>
+        <div class="bubble-time" style="font-size:${fScale*11}px">⏱ ${fmtTime(sub.elapsed)} · ${wpm}타/분</div>`;
       liveScreen.appendChild(div);
     });
   });
 
-  // round state → live screen 전환
-  onValue(ref(db, 'room/round'), snap => {
+  onValue(ref(db, rp('round')), snap => {
     const round = snap.val();
     if (!round) return;
     if (round.state === 'active') {
       document.getElementById('question-panel').style.display = 'none';
       document.getElementById('reset-btn').style.display = '';
-      // live question 표시
-      document.getElementById('live-qtype-label').textContent =
-        round.qtype === 'copy' ? '📝 따라쓰기' : '💬 답변하기';
+      document.getElementById('live-qtype-label').textContent = round.qtype === 'copy' ? '📝 따라쓰기' : '💬 답변하기';
       document.getElementById('live-question-text').textContent = round.question;
       showScreen('live');
     } else if (round.state === 'idle') {
       document.getElementById('question-panel').style.display = 'block';
       document.getElementById('reset-btn').style.display = 'none';
-      // live 화면 버블 초기화
       document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
       renderedBubbleIds.clear();
       showScreen('teacher');
@@ -873,54 +1038,44 @@ function listenAsTeacher() {
 window.startRound = async function() {
   const q = document.getElementById('question-text').value.trim();
   if (!q) { alert('문제를 입력해주세요!'); return; }
-  // clear prev
-  await remove(ref(db, 'room/submissions'));
-  await remove(ref(db, 'room/roundResult'));
-  // reset student done flags
-  const snap = await get(ref(db, 'room/students'));
+  await remove(ref(db, rp('submissions')));
+  await remove(ref(db, rp('roundResult')));
+  const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
-  await update(ref(db), updates);
-  // set round
-  await set(ref(db, 'room/round'), {
-    question: q, qtype: currentQtype,
-    state: 'active', startedAt: Date.now()
-  });
+  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
+  if (Object.keys(updates).length) await update(ref(db), updates);
+  await set(ref(db, rp('round')), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
 };
 
-// ── SHOW ROUND RESULT ──
+// ── ROUND RESULT ──
 window.showRoundResult = async function() {
-  const snap = await get(ref(db, 'room/submissions'));
+  const snap = await get(ref(db, rp('submissions')));
   const subs = snap.val() || {};
-  const roundSnap = await get(ref(db, 'room/round'));
+  const roundSnap = await get(ref(db, rp('round')));
   const round = roundSnap.val() || {};
   const entries = Object.values(subs).sort((a,b) => a.elapsed - b.elapsed);
   renderResult(entries, round.qtype);
-  // save to history
   const historyEntry = { question: round.question, qtype: round.qtype, entries };
-  push(ref(db, 'room/history'), historyEntry);
-  // update cumulative scores
+  push(ref(db, rp('history')), historyEntry);
   entries.forEach((e, i) => {
     const pts = Math.max(10 - i, 1);
-    const scoreRef = ref(db, 'room/scores/' + e.uid);
+    const scoreRef = ref(db, rp('scores/' + e.uid));
     get(scoreRef).then(s => {
       const prev = s.val() || { name: e.name, points: 0, rounds: 0 };
       set(scoreRef, { name: e.name, points: prev.points + pts, rounds: prev.rounds + 1 });
     });
   });
-  // push result to Firebase so students can see their ranking
-  await set(ref(db, 'room/roundResult'), { entries, qtype: round.qtype, publishedAt: Date.now() });
+  await set(ref(db, rp('roundResult')), { entries, qtype: round.qtype, publishedAt: Date.now() });
   showScreen('result');
   prevScreen = 'result';
   document.getElementById('next-round-btn').style.display = '';
 };
 
 function renderResult(entries, qtype) {
-  // podium
   const podiumEl = document.getElementById('podium');
   podiumEl.innerHTML = '';
-  const podiumOrder = [1, 0, 2]; // 2nd, 1st, 3rd
+  const podiumOrder = [1, 0, 2];
   const heights = [90, 130, 70];
   const colors = [
     { bg: '#c0c0c0', border: '#a8a8a8', text: '#000' },
@@ -935,18 +1090,12 @@ function renderResult(entries, qtype) {
     const item = document.createElement('div');
     item.className = 'podium-item';
     item.innerHTML = `
-      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
-        ${medals[rankIdx]}
-      </div>
+      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">${medals[rankIdx]}</div>
       <div class="podium-name">${e.name}</div>
       <div class="podium-time">${fmtTime(e.elapsed)}</div>
-      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
-        ${rankIdx + 1}
-      </div>`;
+      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">${rankIdx+1}</div>`;
     podiumEl.appendChild(item);
   });
-
-  // list
   const listEl = document.getElementById('rank-list');
   listEl.innerHTML = '';
   entries.forEach((e, i) => {
@@ -964,18 +1113,16 @@ function renderResult(entries, qtype) {
   });
 }
 
-// ── SHOW FINAL RESULT ──
+// ── FINAL RESULT ──
 window.showFinalResult = async function() {
   const [scoresSnap, histSnap] = await Promise.all([
-    get(ref(db, 'room/scores')),
-    get(ref(db, 'room/history'))
+    get(ref(db, rp('scores'))),
+    get(ref(db, rp('history')))
   ]);
   const scores = scoresSnap.val() || {};
   const history = histSnap.val() || {};
-
   const sorted = Object.values(scores).sort((a,b) => b.points - a.points);
 
-  // podium
   const podiumEl = document.getElementById('final-podium');
   podiumEl.innerHTML = '';
   const podiumOrder = [1, 0, 2];
@@ -993,18 +1140,13 @@ window.showFinalResult = async function() {
     const item = document.createElement('div');
     item.className = 'podium-item';
     item.innerHTML = `
-      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">
-        ${medals[rankIdx]}
-      </div>
+      <div class="podium-avatar" style="background:${c.bg};border-color:${c.border};color:${c.text}">${medals[rankIdx]}</div>
       <div class="podium-name">${e.name}</div>
       <div class="podium-time">${e.points}점 · ${e.rounds}라운드</div>
-      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">
-        ${rankIdx + 1}
-      </div>`;
+      <div class="podium-block" style="height:${heights[pos]}px;background:${c.bg};">${rankIdx+1}</div>`;
     podiumEl.appendChild(item);
   });
 
-  // rank list
   const listEl = document.getElementById('final-rank-list');
   listEl.innerHTML = '';
   sorted.forEach((e, i) => {
@@ -1019,7 +1161,6 @@ window.showFinalResult = async function() {
     listEl.appendChild(item);
   });
 
-  // history
   const histEl = document.getElementById('game-history');
   histEl.innerHTML = '<div class="panel-title" style="margin-bottom:0.8rem;">게임 기록</div>';
   Object.values(history).forEach((h, i) => {
@@ -1038,48 +1179,40 @@ window.showFinalResult = async function() {
   showScreen('final');
 };
 
-window.goBackToResult = function() {
-  showScreen(prevScreen);
-};
+window.goBackToResult = function() { showScreen(prevScreen); };
 
 // ── NEXT ROUND ──
 window.nextRound = async function() {
-  await set(ref(db, 'room/round'), { state: 'idle' });
-  await remove(ref(db, 'room/submissions'));
-  await remove(ref(db, 'room/roundResult'));
-  // reset student done flags
-  const snap = await get(ref(db, 'room/students'));
+  await set(ref(db, rp('round')), { state: 'idle' });
+  await remove(ref(db, rp('submissions')));
+  await remove(ref(db, rp('roundResult')));
+  const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`room/students/${id}/done`] = false; });
+  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
-  // clear live bubbles
   document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
   renderedBubbleIds.clear();
   showScreen('teacher');
 };
-
 window.resetGame = window.nextRound;
 
 // ── STUDENT LISTENERS ──
 function listenAsStudent() {
-  onValue(ref(db, 'room/round'), snap => {
+  onValue(ref(db, rp('round')), snap => {
     const round = snap.val();
     if (!round || round.state !== 'active') {
-      // reset to waiting when new round starts or idle
       if (!round || round.state === 'idle') {
         document.getElementById('student-waiting').classList.remove('hidden');
         document.getElementById('student-game').classList.add('hidden');
         document.getElementById('student-done').classList.add('hidden');
         const sr = document.getElementById('student-result');
         sr.classList.add('hidden'); sr.style.display = 'none';
-        stopTimer();
-        roundActive = false;
+        stopTimer(); roundActive = false;
       }
       return;
     }
-    // new round
     if (!roundActive) {
       roundActive = true;
       document.getElementById('student-waiting').classList.add('hidden');
@@ -1091,9 +1224,7 @@ function listenAsStudent() {
       document.getElementById('game-type-label').textContent =
         round.qtype === 'copy' ? '📝 따라쓰기 — 아래 문장을 그대로 입력하세요' : '💬 답변하기 — 자유롭게 답변하세요';
       const inp = document.getElementById('typing-input');
-      inp.value = '';
-      inp.disabled = false;
-      inp.classList.remove('error');
+      inp.value = ''; inp.disabled = false; inp.classList.remove('error');
       document.getElementById('error-msg').textContent = '';
       document.getElementById('submit-btn').disabled = false;
       startTime = Date.now();
@@ -1101,8 +1232,7 @@ function listenAsStudent() {
     }
   });
 
-  // listen for teacher publishing results
-  onValue(ref(db, 'room/roundResult'), snap => {
+  onValue(ref(db, rp('roundResult')), snap => {
     const result = snap.val();
     if (!result || !result.entries) return;
     showStudentResult(result.entries, result.qtype);
@@ -1113,40 +1243,30 @@ function showStudentResult(entries, qtype) {
   document.getElementById('student-waiting').classList.add('hidden');
   document.getElementById('student-game').classList.add('hidden');
   document.getElementById('student-done').classList.add('hidden');
-
   const sr = document.getElementById('student-result');
-  sr.classList.remove('hidden');
-  sr.style.display = 'flex';
+  sr.classList.remove('hidden'); sr.style.display = 'flex';
 
-  // find my rank
   const myIdx = entries.findIndex(e => e.uid === myId);
   const myRank = myIdx + 1;
   const myEntry = entries[myIdx];
 
-  // congrats for top 3
   const congratsEl = document.getElementById('student-congrats');
   if (myRank >= 1 && myRank <= 3 && myEntry) {
-    const medals = ['🥇', '🥈', '🥉'];
-    const colors = ['#f0a500', '#9ca3af', '#cd7f32'];
+    const medals = ['🥇','🥈','🥉'];
+    const colors = ['#f0a500','#9ca3af','#cd7f32'];
     congratsEl.style.display = 'block';
-    congratsEl.style.background = myRank === 1
-      ? 'rgba(240,165,0,0.1)' : myRank === 2
-      ? 'rgba(156,163,175,0.1)' : 'rgba(205,127,50,0.1)';
+    congratsEl.style.background = myRank===1?'rgba(240,165,0,0.1)':myRank===2?'rgba(156,163,175,0.1)':'rgba(205,127,50,0.1)';
     congratsEl.style.border = `2px solid ${colors[myRank-1]}`;
     congratsEl.style.color = colors[myRank-1];
     congratsEl.innerHTML = `${medals[myRank-1]} 축하합니다! ${myRank}등입니다!`;
-  } else {
-    congratsEl.style.display = 'none';
-  }
+  } else { congratsEl.style.display = 'none'; }
 
-  // my rank highlight
   const rankColors = ['#f0a500','#9ca3af','#cd7f32'];
   const rankEl = document.getElementById('my-rank-num');
   if (myEntry) {
     rankEl.textContent = myRank + '등';
     rankEl.style.color = myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
-    document.getElementById('my-rank-highlight').style.borderColor =
-      myRank <= 3 ? rankColors[myRank-1] : 'var(--accent)';
+    document.getElementById('my-rank-highlight').style.borderColor = myRank<=3?rankColors[myRank-1]:'var(--accent)';
     document.getElementById('my-rank-time').textContent = '⏱ ' + fmtTime(myEntry.elapsed);
     document.getElementById('my-rank-wpm').textContent = calcWPM(myEntry.answer, myEntry.elapsed) + ' 타/분';
   } else {
@@ -1155,22 +1275,18 @@ function showStudentResult(entries, qtype) {
     document.getElementById('my-rank-wpm').textContent = '';
   }
 
-  // full rank list
   const listEl = document.getElementById('student-rank-list');
   listEl.innerHTML = '';
   entries.forEach((e, i) => {
     const isMe = e.uid === myId;
     const item = document.createElement('div');
     item.style.cssText = `display:flex;align-items:center;gap:12px;padding:0.7rem 1rem;
-      border-radius:var(--radius-sm);border:1.5px solid ${isMe ? 'var(--accent)' : 'rgba(0,0,0,0.07)'};
-      background:${isMe ? 'rgba(233,69,96,0.05)' : '#fff'};
-      font-weight:${isMe ? '700' : '400'};`;
-    const numStyle = i < 3
-      ? `background:${['#f0a500','#9ca3af','#cd7f32'][i]};color:#fff;`
-      : 'background:#f0f2f5;color:var(--text2);';
+      border-radius:var(--radius-sm);border:1.5px solid ${isMe?'var(--accent)':'rgba(0,0,0,0.07)'};
+      background:${isMe?'rgba(233,69,96,0.05)':'#fff'};font-weight:${isMe?'700':'400'};`;
+    const numStyle = i<3?`background:${['#f0a500','#9ca3af','#cd7f32'][i]};color:#fff;`:'background:#f0f2f5;color:var(--text2);';
     item.innerHTML = `
       <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;flex-shrink:0;${numStyle}">${i+1}</div>
-      <div style="flex:1;font-size:0.9rem;">${e.name}${isMe ? ' <span style="color:var(--accent);font-size:0.75rem;">(나)</span>' : ''}</div>
+      <div style="flex:1;font-size:0.9rem;">${e.name}${isMe?' <span style="color:var(--accent);font-size:0.75rem;">(나)</span>':''}</div>
       <div style="font-size:0.82rem;color:var(--text2);">${fmtTime(e.elapsed)}</div>`;
     listEl.appendChild(item);
   });
@@ -1183,70 +1299,58 @@ function startTimer() {
     const elapsed = Date.now() - startTime;
     document.getElementById('student-timer').textContent = (elapsed/1000).toFixed(1) + 's';
     const inp = document.getElementById('typing-input');
-    const wpm = calcWPM(inp.value, elapsed);
-    document.getElementById('wpm-display').textContent = wpm + ' 타/분';
+    document.getElementById('wpm-display').textContent = calcWPM(inp.value, elapsed) + ' 타/분';
     document.getElementById('char-count').textContent = inp.value.length + '자';
   }, 100);
 }
-function stopTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-}
+function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
 
 window.onTypingInput = function() {
-  const inp = document.getElementById('typing-input');
-  inp.classList.remove('error');
+  document.getElementById('typing-input').classList.remove('error');
   document.getElementById('error-msg').textContent = '';
 };
-
 window.onTypingKeydown = function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    submitAnswer();
-  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitAnswer(); }
 };
-
 window.submitAnswer = async function() {
   const inp = document.getElementById('typing-input');
   const answer = inp.value.trim();
   if (!answer) { inp.classList.add('error'); document.getElementById('error-msg').textContent = '내용을 입력해주세요.'; return; }
 
-  const roundSnap = await get(ref(db, 'room/round'));
+  const roundSnap = await get(ref(db, rp('round')));
   const round = roundSnap.val() || {};
   const elapsed = Date.now() - startTime;
 
-  // copy type: check accuracy
-  let correct = true;
-  if (round.qtype === 'copy') {
-    correct = answer === round.question;
-    if (!correct) {
-      inp.classList.add('error');
-      document.getElementById('error-msg').textContent = '⚠ 텍스트가 다릅니다. 다시 확인해 주세요.';
-      return;
-    }
+  if (round.qtype === 'copy' && answer !== round.question) {
+    inp.classList.add('error');
+    document.getElementById('error-msg').textContent = '⚠ 텍스트가 다릅니다. 다시 확인해 주세요.';
+    return;
   }
 
   stopTimer();
   inp.disabled = true;
   document.getElementById('submit-btn').disabled = true;
 
-  // submit
-  await set(ref(db, 'room/submissions/' + myId), {
-    uid: myId, name: myName, answer, elapsed, correct,
+  await set(ref(db, rp('submissions/' + myId)), {
+    uid: myId, name: myName, answer, elapsed, correct: true,
     wpm: calcWPM(answer, elapsed), submittedAt: Date.now()
   });
-  // mark done
-  await update(ref(db, 'room/students/' + myId), { done: true });
+  await update(ref(db, rp('students/' + myId)), { done: true });
 
   roundActive = false;
   document.getElementById('student-game').classList.add('hidden');
   document.getElementById('student-done').classList.remove('hidden');
 };
 
-// ── INIT ──
+// ── KEYBOARD SHORTCUT ──
 window.addEventListener('keydown', e => {
-  if (document.getElementById('screen-lobby').classList.contains('active') && e.key === 'Enter') {
-    window.enterRoom();
+  const active = document.querySelector('.screen.active');
+  if (active && e.key === 'Enter') {
+    if (active.id === 'screen-student-join') window.joinRoom();
+    if (active.id === 'screen-teacher-setup') {
+      const tab = document.getElementById('tab-create').classList.contains('active');
+      if (tab) window.createRoom(); else window.enterExistingRoom();
+    }
   }
 });
 </script>

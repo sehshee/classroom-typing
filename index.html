@@ -686,18 +686,37 @@ let prevScreen = 'result';
 let renderedBubbleIds = new Set();
 
 const BUBBLE_COLORS = [
-  { bg: 'rgba(233,69,96,0.10)',  border: '#e94560', text: '#c0283e' },
-  { bg: 'rgba(37,99,235,0.10)',  border: '#2563eb', text: '#1d4ed8' },
-  { bg: 'rgba(22,163,74,0.10)',  border: '#16a34a', text: '#15803d' },
-  { bg: 'rgba(234,88,12,0.10)',  border: '#ea580c', text: '#c2410c' },
-  { bg: 'rgba(124,58,237,0.10)', border: '#7c3aed', text: '#6d28d9' },
-  { bg: 'rgba(219,39,119,0.10)', border: '#db2777', text: '#be185d' },
-  { bg: 'rgba(202,138,4,0.10)',  border: '#ca8a04', text: '#a16207' },
-  { bg: 'rgba(6,182,212,0.10)',  border: '#06b6d4', text: '#0e7490' },
-  { bg: 'rgba(239,68,68,0.10)',  border: '#ef4444', text: '#dc2626' },
-  { bg: 'rgba(16,185,129,0.10)', border: '#10b981', text: '#059669' },
+  { bg: 'rgba(233,69,96,0.12)',   border: '#e94560', text: '#c0283e' },
+  { bg: 'rgba(37,99,235,0.12)',   border: '#2563eb', text: '#1d4ed8' },
+  { bg: 'rgba(22,163,74,0.12)',   border: '#16a34a', text: '#15803d' },
+  { bg: 'rgba(234,88,12,0.12)',   border: '#ea580c', text: '#c2410c' },
+  { bg: 'rgba(124,58,237,0.12)',  border: '#7c3aed', text: '#6d28d9' },
+  { bg: 'rgba(219,39,119,0.12)',  border: '#db2777', text: '#be185d' },
+  { bg: 'rgba(202,138,4,0.12)',   border: '#ca8a04', text: '#a16207' },
+  { bg: 'rgba(6,182,212,0.12)',   border: '#06b6d4', text: '#0e7490' },
+  { bg: 'rgba(16,185,129,0.12)',  border: '#10b981', text: '#059669' },
+  { bg: 'rgba(99,102,241,0.12)',  border: '#6366f1', text: '#4338ca' },
+  { bg: 'rgba(245,158,11,0.12)',  border: '#f59e0b', text: '#b45309' },
+  { bg: 'rgba(20,184,166,0.12)',  border: '#14b8a6', text: '#0f766e' },
+  { bg: 'rgba(239,68,68,0.12)',   border: '#ef4444', text: '#b91c1c' },
+  { bg: 'rgba(168,85,247,0.12)',  border: '#a855f7', text: '#7e22ce' },
+  { bg: 'rgba(251,146,60,0.12)',  border: '#fb923c', text: '#c2410c' },
+  { bg: 'rgba(52,211,153,0.12)',  border: '#34d399', text: '#065f46' },
+  { bg: 'rgba(56,189,248,0.12)',  border: '#38bdf8', text: '#0369a1' },
+  { bg: 'rgba(251,191,36,0.12)',  border: '#fbbf24', text: '#92400e' },
+  { bg: 'rgba(244,114,182,0.12)', border: '#f472b6', text: '#9d174d' },
+  { bg: 'rgba(74,222,128,0.12)',  border: '#4ade80', text: '#166534' },
 ];
-function getColor(idx) { return BUBBLE_COLORS[idx % BUBBLE_COLORS.length]; }
+// 학생별 고정 색상 매핑 (중복 방지)
+const assignedColors = {};
+let colorCursor = 0;
+function getColor(uid) {
+  if (!assignedColors[uid]) {
+    assignedColors[uid] = BUBBLE_COLORS[colorCursor % BUBBLE_COLORS.length];
+    colorCursor++;
+  }
+  return assignedColors[uid];
+}
 
 // ── ROOM PATH HELPER ──
 function rp(path) { return `rooms/${roomCode}/${path}`; }
@@ -994,22 +1013,34 @@ function listenAsTeacher() {
     const n = entries.length;
     if (n === 0) return;
 
-    // Determine grid cols/rows to fill screen evenly
+    // Max bubble size — never larger than 260×150 regardless of student count
+    const MAX_BW = 260;
+    const MAX_BH = 150;
+
+    // Grid layout
     const cols = Math.ceil(Math.sqrt(n * screenW / (screenH - headerH)));
     const rows = Math.ceil(n / cols);
     const cellW = screenW / cols;
     const cellH = (screenH - headerH) / rows;
-    const bw = Math.max(120, cellW - PAD * 2);
-    const bh = Math.max(80,  cellH - PAD * 2);
-    const fScale = Math.min(1, bw / 210);
+
+    // Clamp bubble to cell size AND hard max
+    const bw = Math.min(MAX_BW, Math.max(140, cellW - PAD * 2));
+    const bh = Math.min(MAX_BH, Math.max(90,  cellH - PAD * 2));
+
+    // Base font sizes — approx 2× larger than before (22/18 instead of 13/11)
+    const fBase = Math.min(1, bw / 200);
+    const fName = Math.round(fBase * 22);
+    const fText = Math.round(fBase * 26);
+    const fTime = Math.round(fBase * 18);
 
     entries.forEach((sub, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const rx = col * cellW + PAD;
-      const ry = headerH + row * cellH + PAD;
+      // Center bubble within its cell
+      const rx = col * cellW + (cellW - bw) / 2;
+      const ry = headerH + row * cellH + (cellH - bh) / 2;
 
-      const c = getColor(i);
+      const c = getColor(sub.uid);
       const div = document.createElement('div');
       div.className = 'float-bubble';
       div.dataset.uid = sub.uid;
@@ -1017,14 +1048,14 @@ function listenAsTeacher() {
         left:${rx}px; top:${ry}px;
         width:${bw}px; height:${bh}px;
         background:${c.bg}; border-color:${c.border}; color:${c.text};
-        font-size:${fScale*14}px;
-        overflow:hidden; display:flex; flex-direction:column; justify-content:center;
+        overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:2px;
+        padding: 10px 14px;
       `;
       const wpm = calcWPM(sub.answer, sub.elapsed);
       div.innerHTML = `
-        <div class="bubble-name" style="font-size:${fScale*11}px">${sub.name}</div>
-        <div class="bubble-text" style="font-size:${fScale*13}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub.answer}</div>
-        <div class="bubble-time" style="font-size:${fScale*11}px">⏱ ${fmtTime(sub.elapsed)} · ${wpm}타/분</div>`;
+        <div class="bubble-name" style="font-size:${fName}px;font-weight:700;">${sub.name}</div>
+        <div class="bubble-text" style="font-size:${fText}px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub.answer}</div>
+        <div class="bubble-time" style="font-size:${fTime}px;opacity:0.75;">⏱ ${fmtTime(sub.elapsed)} · ${wpm}타/분</div>`;
       liveScreen.appendChild(div);
     });
     renderedBubbleIds = new Set(entries.map(e => e.uid));

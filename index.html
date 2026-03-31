@@ -272,12 +272,22 @@
   }
   .question-type-btns { display: flex; gap: 10px; margin-bottom: 1rem; }
   .qtype-btn {
-    flex: 1; padding: 0.7rem; border-radius: var(--radius-sm);
-    border: 1.5px solid rgba(0,0,0,0.1);
+    flex: 1; padding: 0.9rem; border-radius: var(--radius-sm);
+    border: 2px solid rgba(0,0,0,0.1);
     background: transparent; color: var(--text2);
-    cursor: pointer; font-size: 0.88rem; font-family: inherit; transition: all .2s;
+    cursor: pointer; font-size: 1.76rem; font-family: inherit; font-weight: 700;
+    transition: all .2s; line-height: 1.2;
   }
-  .qtype-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,0.08); }
+  .qtype-btn-copy { border-color: rgba(233,69,96,0.25); color: #c0283e; }
+  .qtype-btn-copy.selected, .qtype-btn-copy:hover {
+    border-color: var(--accent); color: #fff;
+    background: var(--accent);
+  }
+  .qtype-btn-answer { border-color: rgba(37,99,235,0.25); color: #1d4ed8; }
+  .qtype-btn-answer.selected, .qtype-btn-answer:hover {
+    border-color: #2563eb; color: #fff;
+    background: #2563eb;
+  }
   textarea.input-field { height: 80px; resize: vertical; }
   .students-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .student-chip {
@@ -346,10 +356,22 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.06);
   }
   .prompt-box {
-    background: rgba(233,69,96,0.07); border: 1.5px solid rgba(233,69,96,0.25);
     border-radius: var(--radius-sm); padding: 1.2rem 1.4rem;
-    font-size: 1.15rem; line-height: 1.7; color: var(--text); min-height: 64px;
+    font-size: 1.15rem; line-height: 1.7; min-height: 64px;
   }
+  .prompt-box-copy {
+    background: rgba(233,69,96,0.07); border: 1.5px solid rgba(233,69,96,0.35);
+    color: #c0283e;
+  }
+  .prompt-box-answer {
+    background: rgba(37,99,235,0.07); border: 1.5px solid rgba(37,99,235,0.35);
+    color: #1d4ed8;
+  }
+  .game-type-label {
+    font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; letter-spacing: -0.3px;
+  }
+  .game-type-label-copy { color: var(--accent); }
+  .game-type-label-answer { color: #2563eb; }
   .typing-input {
     width: 100%; padding: 1rem 1.2rem; background: #f7f8fa;
     border: 2px solid rgba(0,0,0,0.1); border-radius: var(--radius-sm);
@@ -446,7 +468,6 @@
     <div id="tab-create-content">
       <input class="input-field" id="create-name" placeholder="선생님 이름" maxlength="12" />
       <input class="input-field" id="create-room-name" placeholder="방 이름 (예: 3학년2반)" maxlength="20" />
-      <input class="input-field" id="create-pw" type="password" placeholder="방 비밀번호 (기본: 1234)" maxlength="20" />
       <button class="btn-primary" onclick="createRoom()">🏫 새 방 만들기</button>
       <div class="small mt center" id="create-error" style="color:#ff6b6b;min-height:18px;"></div>
     </div>
@@ -455,7 +476,6 @@
     <div id="tab-enter-content" class="hidden">
       <input class="input-field code-input" id="enter-room-code" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase()" />
       <input class="input-field" id="enter-name" placeholder="선생님 이름" maxlength="12" />
-      <input class="input-field" id="enter-pw" type="password" placeholder="방 비밀번호" />
       <button class="btn-primary" onclick="enterExistingRoom()">입장하기</button>
       <div class="small mt center" id="enter-error" style="color:#ff6b6b;min-height:18px;"></div>
     </div>
@@ -488,6 +508,8 @@
       <button class="btn-secondary" onclick="openPwModal()">🔑 비밀번호</button>
       <button class="btn-secondary" onclick="showFinalResult()">🏆 최종 순위</button>
       <button class="btn-secondary" onclick="resetGame()" id="reset-btn" style="display:none">🔄 새 문제</button>
+      <button class="btn-secondary" onclick="goHome()" style="border-color:rgba(0,0,0,0.18);">🏠 새 수업</button>
+      <button class="btn-danger" onclick="deleteRoom()" style="padding:0.5rem 1rem;font-size:0.82rem;">🚪 방 삭제</button>
     </div>
   </div>
 
@@ -499,8 +521,8 @@
   <div class="panel" id="question-panel">
     <div class="panel-title">문제 출제</div>
     <div class="question-type-btns">
-      <button class="qtype-btn selected" id="qtype-copy" onclick="selectQtype('copy')">📝 따라쓰기</button>
-      <button class="qtype-btn" id="qtype-answer" onclick="selectQtype('answer')">💬 답변하기</button>
+      <button class="qtype-btn qtype-btn-copy selected" id="qtype-copy" onclick="selectQtype('copy')">📝 따라쓰기</button>
+      <button class="qtype-btn qtype-btn-answer" id="qtype-answer" onclick="selectQtype('answer')">💬 답변하기</button>
     </div>
     <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 입력하세요..."></textarea>
     <div class="flex-row">
@@ -543,7 +565,7 @@
       선생님의 문제를 기다리는 중<span class="waiting-dot">...</span>
     </div>
     <div id="student-game" class="hidden">
-      <div class="small" id="game-type-label" style="margin-bottom:0.5rem;"></div>
+      <div class="game-type-label" id="game-type-label"></div>
       <div class="prompt-box" id="student-prompt"></div>
       <div class="status-bar">
         <div class="timer" id="student-timer">0.0s</div>
@@ -595,6 +617,7 @@
     <button class="btn-secondary" onclick="goBackToResult()">← 돌아가기</button>
     <button class="btn-primary" id="final-new-btn" onclick="nextRound()" style="display:none;width:auto;">새 게임 시작 ▶</button>
     <button class="btn-reset-game" id="full-reset-btn" onclick="fullResetGame()" style="display:none">🗑️ 전체 초기화</button>
+    <button class="btn-danger" id="delete-room-btn-final" onclick="deleteRoom()" style="display:none">🚪 방 삭제하기</button>
   </div>
 </div>
 
@@ -788,13 +811,11 @@ window.changePassword = async function() {
 window.createRoom = async function() {
   const name     = document.getElementById('create-name').value.trim();
   const roomName = document.getElementById('create-room-name').value.trim();
-  const pw       = document.getElementById('create-pw').value || '1234';
   const errEl    = document.getElementById('create-error');
   errEl.textContent = '';
   if (!name)     { errEl.textContent = '선생님 이름을 입력해주세요.'; return; }
   if (!roomName) { errEl.textContent = '방 이름을 입력해주세요.'; return; }
 
-  // 코드 생성 (중복 확인)
   let code, exists = true;
   while (exists) {
     code = genRoomCode();
@@ -807,7 +828,6 @@ window.createRoom = async function() {
 
   await set(ref(db, `rooms/${roomCode}`), {
     meta: { name: roomName, createdAt: Date.now(), teacherName: name },
-    password: pw,
     teacher: { name, online: true },
     round: { state: 'idle' }
   });
@@ -819,7 +839,6 @@ window.createRoom = async function() {
 window.enterExistingRoom = async function() {
   const code  = document.getElementById('enter-room-code').value.trim().toUpperCase();
   const name  = document.getElementById('enter-name').value.trim();
-  const pw    = document.getElementById('enter-pw').value;
   const errEl = document.getElementById('enter-error');
   errEl.textContent = '';
   if (code.length !== 6) { errEl.textContent = '6자리 방 코드를 입력해주세요.'; return; }
@@ -828,17 +847,13 @@ window.enterExistingRoom = async function() {
   const snap = await get(ref(db, `rooms/${code}`));
   if (!snap.exists()) { errEl.textContent = '존재하지 않는 방 코드입니다.'; return; }
   const room = snap.val();
-  const storedPw = room.password || '1234';
-  if (pw !== storedPw) { errEl.textContent = '비밀번호가 틀렸습니다.'; return; }
 
-  // 만료 확인 (24시간)
   const age = Date.now() - (room.meta?.createdAt || 0);
   if (age > 86400000) { errEl.textContent = '⚠ 이 방은 만료되었습니다. 새 방을 만들어주세요.'; return; }
 
   roomCode = code;
   myName = name; myId = 'teacher';
 
-  // 선생님 재접속 → 학생 초기화
   await remove(ref(db, rp('students')));
   await remove(ref(db, rp('submissions')));
   await set(ref(db, rp('round')), { state: 'idle' });
@@ -901,11 +916,25 @@ function initTeacherDashboard() {
   }
 })();
 
-// ── QTYPE ──
 window.selectQtype = function(qt) {
   currentQtype = qt;
   document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
   document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+};
+
+// ── GO HOME ──
+window.goHome = function() {
+  if (!confirm('현재 수업을 종료하고 홈으로 돌아가시겠습니까?\n(방은 삭제되지 않습니다)')) return;
+  roomCode = ''; myName = ''; myId = ''; myRole = '';
+  showScreen('home');
+};
+
+// ── DELETE ROOM ──
+window.deleteRoom = async function() {
+  if (!confirm('⚠️ 방을 삭제하면 모든 데이터(학생, 점수, 기록)가 영구 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
+  await remove(ref(db, `rooms/${roomCode}`));
+  roomCode = ''; myName = ''; myId = ''; myRole = '';
+  showScreen('home');
 };
 
 // ── FULL RESET ──
@@ -954,65 +983,51 @@ function listenAsTeacher() {
     const liveCount = document.getElementById('live-submit-count');
     if (liveCount) liveCount.textContent = entries.length + '명 제출';
 
-    const studentBadgeText = document.getElementById('live-student-badge').textContent;
-    const totalStudents = parseInt(studentBadgeText) || Math.max(entries.length, 1);
-
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
     const headerH = 72;
-    const availW = screenW;
-    const availH = screenH - headerH;
+    const PAD = 12;
 
-    const cols = Math.ceil(Math.sqrt(totalStudents * availW / availH));
-    const rows = Math.ceil(totalStudents / cols);
-    const cellW = availW / cols;
-    const cellH = availH / rows;
-    const bw = Math.min(280, Math.max(140, cellW * 0.85));
-    const bh = Math.min(160, Math.max(90,  cellH * 0.82));
+    // Remove old bubbles and re-layout all from scratch each time
+    liveScreen.querySelectorAll('.float-bubble').forEach(b => b.remove());
 
-    const qBox = document.getElementById('live-question-box');
-    let qRect = { left: screenW*0.15, right: screenW*0.85, top: screenH*0.3, bottom: screenH*0.7 };
-    if (qBox) {
-      const r = qBox.getBoundingClientRect();
-      const pad = 24;
-      qRect = { left: r.left - pad, right: r.right + pad, top: r.top - pad, bottom: r.bottom + pad };
-    }
-    function overlapsCenter(x, y) {
-      return !(x + bw < qRect.left || x > qRect.right || y + bh < qRect.top || y > qRect.bottom);
-    }
+    const n = entries.length;
+    if (n === 0) return;
+
+    // Determine grid cols/rows to fill screen evenly
+    const cols = Math.ceil(Math.sqrt(n * screenW / (screenH - headerH)));
+    const rows = Math.ceil(n / cols);
+    const cellW = screenW / cols;
+    const cellH = (screenH - headerH) / rows;
+    const bw = Math.max(120, cellW - PAD * 2);
+    const bh = Math.max(80,  cellH - PAD * 2);
+    const fScale = Math.min(1, bw / 210);
 
     entries.forEach((sub, i) => {
-      if (renderedBubbleIds.has(sub.uid)) return;
-      renderedBubbleIds.add(sub.uid);
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const rx = col * cellW + PAD;
+      const ry = headerH + row * cellH + PAD;
+
       const c = getColor(i);
       const div = document.createElement('div');
       div.className = 'float-bubble';
-      div.style.background = c.bg;
-      div.style.borderColor = c.border;
-      div.style.color = c.text;
-      div.style.width = bw + 'px';
-      div.style.maxWidth = bw + 'px';
-      div.style.minWidth = '0';
-      const fScale = Math.min(1, bw / 220);
-      div.style.fontSize = (fScale * 14) + 'px';
-
-      let rx, ry, attempts = 0;
-      const margin = 12;
-      do {
-        rx = margin + Math.random() * Math.max(0, screenW - bw - margin * 2);
-        ry = headerH + margin + Math.random() * Math.max(0, availH - bh - margin * 2);
-        attempts++;
-      } while (overlapsCenter(rx, ry) && attempts < 15);
-
-      div.style.left = rx + 'px';
-      div.style.top  = ry + 'px';
+      div.dataset.uid = sub.uid;
+      div.style.cssText = `
+        left:${rx}px; top:${ry}px;
+        width:${bw}px; height:${bh}px;
+        background:${c.bg}; border-color:${c.border}; color:${c.text};
+        font-size:${fScale*14}px;
+        overflow:hidden; display:flex; flex-direction:column; justify-content:center;
+      `;
       const wpm = calcWPM(sub.answer, sub.elapsed);
       div.innerHTML = `
         <div class="bubble-name" style="font-size:${fScale*11}px">${sub.name}</div>
-        <div class="bubble-text" style="font-size:${fScale*13}px">${sub.answer}</div>
+        <div class="bubble-text" style="font-size:${fScale*13}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub.answer}</div>
         <div class="bubble-time" style="font-size:${fScale*11}px">⏱ ${fmtTime(sub.elapsed)} · ${wpm}타/분</div>`;
       liveScreen.appendChild(div);
     });
+    renderedBubbleIds = new Set(entries.map(e => e.uid));
   });
 
   onValue(ref(db, rp('round')), snap => {
@@ -1175,6 +1190,7 @@ window.showFinalResult = async function() {
   if (myRole === 'teacher') {
     document.getElementById('final-new-btn').style.display = '';
     document.getElementById('full-reset-btn').style.display = '';
+    document.getElementById('delete-room-btn-final').style.display = '';
   }
   showScreen('final');
 };
@@ -1221,8 +1237,12 @@ function listenAsStudent() {
       sr.classList.add('hidden'); sr.style.display = 'none';
       document.getElementById('student-game').classList.remove('hidden');
       document.getElementById('student-prompt').textContent = round.question;
-      document.getElementById('game-type-label').textContent =
-        round.qtype === 'copy' ? '📝 따라쓰기 — 아래 문장을 그대로 입력하세요' : '💬 답변하기 — 자유롭게 답변하세요';
+      const isCopy = round.qtype === 'copy';
+      const labelEl = document.getElementById('game-type-label');
+      const promptEl = document.getElementById('student-prompt');
+      labelEl.textContent = isCopy ? '📝 따라쓰기 — 아래 문장을 그대로 입력하세요' : '💬 답변하기 — 자유롭게 답변하세요';
+      labelEl.className = 'game-type-label ' + (isCopy ? 'game-type-label-copy' : 'game-type-label-answer');
+      promptEl.className = 'prompt-box ' + (isCopy ? 'prompt-box-copy' : 'prompt-box-answer');
       const inp = document.getElementById('typing-input');
       inp.value = ''; inp.disabled = false; inp.classList.remove('error');
       document.getElementById('error-msg').textContent = '';

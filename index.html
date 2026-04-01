@@ -950,8 +950,11 @@ window.goHome = function() {
 // ── DELETE ROOM ──
 window.deleteRoom = async function() {
   if (!confirm('⚠️ 방을 삭제하면 모든 데이터(학생, 점수, 기록)가 영구 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
-  await remove(ref(db, `rooms/${roomCode}`));
+  const deletedCode = roomCode;
   roomCode = ''; myName = ''; myId = ''; myRole = '';
+  await remove(ref(db, `rooms/${deletedCode}`));
+  // URL을 기본 주소로 초기화
+  window.history.replaceState({}, '', 'https://sehshee.github.io/classroom-typing');
   showScreen('home');
 };
 
@@ -1251,6 +1254,21 @@ window.resetGame = window.nextRound;
 
 // ── STUDENT LISTENERS ──
 function listenAsStudent() {
+  // 방 삭제 감지 — rooms/{code} 자체가 사라지면 학생을 코드 입력 화면으로 내보냄
+  onValue(ref(db, `rooms/${roomCode}`), snap => {
+    if (!snap.exists()) {
+      stopTimer();
+      roundActive = false;
+      myName = ''; myId = ''; roomCode = ''; myRole = '';
+      // URL 파라미터 제거
+      window.history.replaceState({}, '', 'https://sehshee.github.io/classroom-typing');
+      // 코드 입력 대기 화면으로 이동
+      document.getElementById('student-room-code').value = '';
+      document.getElementById('student-name-input').value = '';
+      document.getElementById('student-join-error').textContent = '선생님이 방을 삭제했습니다.';
+      showScreen('student-join');
+    }
+  });
   onValue(ref(db, rp('round')), snap => {
     const round = snap.val();
     if (!round || round.state !== 'active') {

@@ -423,7 +423,77 @@
   .history-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; margin-bottom: 8px; font-size: 0.88rem; color: var(--text2); }
   .history-item strong { color: var(--text); }
 
-  /* ── UTIL ── */
+  /* ── QUESTION PANEL (새 디자인) ── */
+  .input-mode-toggle {
+    display: flex; gap: 0;
+    background: #f0f2f5; border-radius: 99px; padding: 3px;
+    margin-bottom: 1rem; width: fit-content;
+  }
+  .input-mode-btn {
+    padding: 5px 18px; border-radius: 99px;
+    border: none; background: transparent; color: var(--text2);
+    font-size: 0.85rem; font-family: inherit; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .input-mode-btn.active {
+    background: #fff; color: var(--text);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  }
+  .level-row {
+    display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .level-btn {
+    flex: 1; padding: 0.65rem 0.5rem; border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: #fff; color: var(--text2);
+    font-size: 0.85rem; font-family: inherit; cursor: pointer; transition: all .15s;
+    text-align: center; font-weight: 600;
+  }
+  .level-btn.active {
+    border-color: var(--accent); background: rgba(233,69,96,0.08);
+    color: var(--accent); font-weight: 700;
+  }
+  .random-preview {
+    display: none;
+    background: rgba(233,69,96,0.06); border: 1.5px solid rgba(233,69,96,0.2);
+    border-radius: var(--radius-sm); padding: 0.9rem 1rem;
+    margin-bottom: 1rem; cursor: pointer; transition: all .2s;
+    position: relative;
+  }
+  .random-preview:hover { background: rgba(233,69,96,0.1); }
+  .random-preview.visible { display: block; }
+  .random-preview-word {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.5rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .random-preview-hint {
+    font-size: 0.75rem; color: var(--text2); margin-top: 3px;
+  }
+  .random-preview-refresh {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 1.2rem; opacity: 0.5;
+  }
+  .btn-start-random {
+    width: 100%; padding: 0.9rem 1rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 1rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all .2s; letter-spacing: 0.5px;
+  }
+  .btn-start-random:hover { background: #c73652; transform: translateY(-1px); }
+  .answer-panel-wrap { display: flex; flex-direction: column; gap: 0; }
+  .answer-q-btn {
+    padding: 0.55rem 1rem; border-radius: 99px;
+    border: 1.5px solid rgba(37,99,235,0.25);
+    background: #fff; color: #1d4ed8;
+    font-size: 0.84rem; font-family: inherit; font-weight: 600;
+    cursor: pointer; transition: all .18s; text-align: left;
+  }
+  .answer-q-btn:hover { border-color: #2563eb; background: rgba(37,99,235,0.07); }
+  .answer-q-btn.selected {
+    border-color: #2563eb; background: #2563eb; color: #fff;
+  }
   .hidden { display: none !important; }
   .mt { margin-top: 1rem; }
   .center { text-align: center; }
@@ -519,14 +589,58 @@
 
   <div class="panel" id="question-panel">
     <div class="panel-title">문제 출제</div>
+
+    <!-- 모드 선택 탭: 따라쓰기 / 답변하기 -->
     <div class="question-type-btns">
       <button class="qtype-btn qtype-btn-copy selected" id="qtype-copy" onclick="selectQtype('copy')">📝 따라쓰기</button>
       <button class="qtype-btn qtype-btn-answer" id="qtype-answer" onclick="selectQtype('answer')">💬 답변하기</button>
     </div>
-    <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 입력하세요..."></textarea>
-    <div class="flex-row">
-      <button class="btn-primary grow" onclick="startRound()">▶ 게임 시작</button>
+
+    <!-- ── 따라쓰기 패널 ── -->
+    <div id="copy-panel">
+
+      <!-- 난이도 선택 -->
+      <div class="level-row">
+        <button class="level-btn active" data-level="1" onclick="selectLevel(1)">⭐ 기초</button>
+        <button class="level-btn" data-level="2" onclick="selectLevel(2)">⭐⭐ 중급</button>
+        <button class="level-btn" data-level="3" onclick="selectLevel(3)">⭐⭐⭐ 고급</button>
+      </div>
+
+      <!-- 입력 방식 토글: 🎲 랜덤 / ✏️ 직접입력 -->
+      <div class="input-mode-toggle">
+        <button class="input-mode-btn active" id="mode-random" onclick="selectInputMode('random')">🎲 랜덤</button>
+        <button class="input-mode-btn" id="mode-manual" onclick="selectInputMode('manual')">✏️ 직접입력</button>
+      </div>
+
+      <!-- 랜덤 모드: 미리보기 + 바로 시작 -->
+      <div id="random-mode-area">
+        <div class="random-preview" id="random-preview" onclick="previewRandomWord()">
+          <div class="random-preview-word" id="preview-word">—</div>
+          <div class="random-preview-hint">클릭하면 다른 단어로 바꿀 수 있어요</div>
+          <span class="random-preview-refresh">🔄</span>
+        </div>
+        <button class="btn-start-random" onclick="startRound()">
+          🎲 랜덤 단어로 게임 시작
+        </button>
+      </div>
+
+      <!-- 직접입력 모드 -->
+      <div id="manual-mode-area" class="hidden">
+        <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 직접 입력하세요..."></textarea>
+        <button class="btn-primary" onclick="startRound()">▶ 게임 시작</button>
+      </div>
+
     </div>
+
+    <!-- ── 답변하기 패널 ── -->
+    <div id="answer-panel" class="hidden">
+      <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.2px;color:var(--text2);text-transform:uppercase;margin-bottom:0.6rem;">🎲 랜덤 질문 선택</div>
+      <div id="answer-random-btns" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;"></div>
+      <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.2px;color:var(--text2);text-transform:uppercase;margin-bottom:0.5rem;">✏️ 질문 입력</div>
+      <textarea class="input-field" id="question-text-answer" placeholder="질문을 입력하거나 위에서 선택하세요&#10;(예: 좋아하는 계절은 무엇인가요?)" onclick="onAnswerTextareaClick()"></textarea>
+      <button class="btn-primary" onclick="startRound()">▶ 게임 시작</button>
+    </div>
+
   </div>
 
   <div id="bubble-panel" style="display:none"></div>
@@ -934,11 +1048,181 @@ function initTeacherDashboard() {
   }
 })();
 
+// ── 난이도별 단어 데이터 ──
+const WORD_BANK = {
+  1: [
+    '가','나','다','라','마','바','사','아','자','카','타','파','하',
+    '가나','나비','다리','바다','사자','아이','자기','우리','아기','오리',
+    '가게','나무','도로','바보','사이','오이','우유','이마','자리','허리',
+    '가로','나라','도시','바지','사과','오리','우리나라','아버지','어머니',
+    '누나','오빠','고기','구두','기도','나이','다음','모래','부부','시소',
+    '아파','오래','이미','하마','호수','거미','도마','두부','무기','비가',
+  ],
+  2: [
+    '강','달','말','발','산','손','눈','귀','입','팔',
+    '감기','공부','날씨','동물','마음','방법','선물','일기','전화','학교',
+    '건강','고민','그림','남자','노래','독서','문제','반칙','봄날','색깔',
+    '여름','운동','작품','집중','친구','태양','한국','행복','호랑이','화분',
+    '강아지','고양이','도서관','목소리','박수치','선생님','어린이','용기있','자연환','초등학',
+    '가방들','날개달','달리기','동생과','모험심','반짝임','빛나는','사랑해','여행가','웃음꽃',
+  ],
+  3: [
+    '까다','뚜껑','빠르','쏘다','짜다','꼭꼭','딱딱','빽빽','쑥쑥','찍찍',
+    '꽃잎','닭볶','떡볶','뽑기','쌍둥','찹쌀','빠짐','쏟아','꽤나','쩔어',
+    '까불지','꼼꼼히','뚝딱뚝','빠릿빠','쏴버려','짜릿한','꽃봉오','닭다리','떡국을','뽀로로',
+    '가끔씩','깜짝놀','꿈꾸며','끝까지','날뛰지','넘어져','뒤집어','뛰어올','때로는','또래들',
+    '빠져들','뾰족한','쌩쌩달','쏘아올','씩씩하','씹어먹','짬뽕먹','쪽빛하','찌릿찌','쭉뻗어',
+  ],
+};
+
+let selectedLevel = 1;
+let currentInputMode = 'random'; // 'random' | 'manual'
+let previewedWord = '';           // 현재 미리보기된 단어
+
+// ── 답변하기 질문 풀 ──
+const ANSWER_QUESTION_POOL = [
+  '좋아하는 계절은 무엇인가요?', '오늘 아침에 무엇을 먹었나요?', '가장 좋아하는 동물은 무엇인가요?',
+  '방과 후에 무엇을 하고 싶나요?', '가장 좋아하는 색깔은 무엇인가요?', '어떤 음식을 제일 좋아하나요?',
+  '지금 가장 하고 싶은 것은 무엇인가요?', '친구에게 해주고 싶은 말이 있나요?', '오늘 날씨가 어떤가요?',
+  '지금 기분이 어떤가요?', '내가 제일 잘하는 것은 무엇인가요?', '가장 좋아하는 과목은 무엇인가요?',
+  '주말에 무엇을 했나요?', '꿈에서 어떤 직업을 갖고 싶나요?', '가장 재밌었던 기억은 무엇인가요?',
+  '집에서 키우고 싶은 동물은?', '오늘 감사한 일이 있나요?', '나중에 어디서 살고 싶나요?',
+  '어떤 운동을 제일 좋아하나요?', '좋아하는 영화나 만화는 무엇인가요?', '가장 좋아하는 책은 무엇인가요?',
+  '오늘 학교에서 있었던 일은?', '친구와 함께하고 싶은 놀이는?', '어제 잠을 잘 잤나요?',
+  '나를 행복하게 만드는 것은?', '좋아하는 간식은 무엇인가요?', '방학 때 무엇을 하고 싶나요?',
+  '나만의 특별한 능력이 있다면?', '지금 가장 갖고 싶은 것은?', '오늘 새로 배운 것이 있나요?',
+];
+
+let answerShownQuestions = [];   // 현재 화면에 보여지는 질문 목록
+let answerUsedQuestions = new Set(); // 이미 출제된 질문 (중복 방지)
+let selectedAnswerQ = '';        // 현재 선택된 랜덤 질문
+
+function getAnswerQuestions(count = 5) {
+  // 사용하지 않은 질문 중에서 선택
+  const available = ANSWER_QUESTION_POOL.filter(q => !answerUsedQuestions.has(q));
+  const pool = available.length >= count ? available : ANSWER_QUESTION_POOL; // 다 쓰면 전체에서
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function refreshAnswerQuestions(isFirstLoad = false) {
+  if (isFirstLoad || answerShownQuestions.length === 0) {
+    // 첫 로드: 출제된 것 제외하고 새로 5개
+    answerShownQuestions = getAnswerQuestions(5);
+    return;
+  }
+
+  // 다음 문제로 넘어갈 때:
+  // - 출제된 질문(answerUsedQuestions)은 무조건 제외
+  // - 남은 질문 중 30% 확률로 새 질문으로 교체
+  const newQuestions = [];
+  answerShownQuestions.forEach(q => {
+    if (answerUsedQuestions.has(q)) {
+      // 출제된 질문 → 무조건 새 질문으로 교체
+      const exclude = new Set([...answerUsedQuestions, ...newQuestions]);
+      const available = ANSWER_QUESTION_POOL.filter(x => !exclude.has(x));
+      if (available.length > 0) {
+        newQuestions.push(available[Math.floor(Math.random() * available.length)]);
+      }
+    } else if (Math.random() < 0.3) {
+      // 30% 확률로 새 질문으로 교체
+      const exclude = new Set([...answerUsedQuestions, ...newQuestions, ...answerShownQuestions]);
+      const available = ANSWER_QUESTION_POOL.filter(x => !exclude.has(x));
+      if (available.length > 0) {
+        newQuestions.push(available[Math.floor(Math.random() * available.length)]);
+      } else {
+        newQuestions.push(q); // 교체 불가 시 유지
+      }
+    } else {
+      newQuestions.push(q); // 70% 확률로 유지
+    }
+  });
+
+  // 5개 미만이면 채우기
+  while (newQuestions.length < 5) {
+    const exclude = new Set([...answerUsedQuestions, ...newQuestions]);
+    const available = ANSWER_QUESTION_POOL.filter(x => !exclude.has(x));
+    if (available.length > 0) {
+      newQuestions.push(available[Math.floor(Math.random() * available.length)]);
+    } else break;
+  }
+
+  answerShownQuestions = newQuestions;
+}
+
+function renderAnswerRandomBtns() {
+  if (answerShownQuestions.length === 0) {
+    refreshAnswerQuestions(true); // 첫 로드
+  }
+  const container = document.getElementById('answer-random-btns');
+  container.innerHTML = '';
+  answerShownQuestions.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-q-btn' + (q === selectedAnswerQ ? ' selected' : '');
+    btn.textContent = q;
+    btn.onclick = () => selectAnswerRandomQ(q);
+    container.appendChild(btn);
+  });
+}
+
+window.selectAnswerRandomQ = function(q) {
+  selectedAnswerQ = q;
+  document.getElementById('question-text-answer').value = q;
+  renderAnswerRandomBtns();
+};
+
+window.onAnswerTextareaClick = function() {
+  // 클릭 시 랜덤 선택 해제 및 텍스트 클리어 (랜덤으로 선택된 상태일 때만)
+  if (selectedAnswerQ && document.getElementById('question-text-answer').value === selectedAnswerQ) {
+    selectedAnswerQ = '';
+    document.getElementById('question-text-answer').value = '';
+    renderAnswerRandomBtns();
+  }
+};
+
+// ── 모드 전환 (따라쓰기 / 답변하기) ──
 window.selectQtype = function(qt) {
   currentQtype = qt;
   document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
   document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+  document.getElementById('copy-panel').classList.toggle('hidden', qt !== 'copy');
+  document.getElementById('answer-panel').classList.toggle('hidden', qt !== 'answer');
+  if (qt === 'answer') renderAnswerRandomBtns();
 };
+
+// ── 난이도 선택 ──
+window.selectLevel = function(lv) {
+  selectedLevel = lv;
+  document.querySelectorAll('.level-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.level === lv);
+  });
+  // 랜덤 모드이면 미리보기 자동 갱신
+  if (currentInputMode === 'random') previewRandomWord();
+};
+
+// ── 입력 방식 토글 (랜덤 / 직접입력) ──
+window.selectInputMode = function(mode) {
+  currentInputMode = mode;
+  document.getElementById('mode-random').classList.toggle('active', mode === 'random');
+  document.getElementById('mode-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('random-mode-area').classList.toggle('hidden', mode !== 'random');
+  document.getElementById('manual-mode-area').classList.toggle('hidden', mode !== 'manual');
+  // 랜덤 모드 전환 시 미리보기 초기 표시
+  if (mode === 'random') previewRandomWord();
+};
+
+// ── 랜덤 단어 미리보기 ──
+window.previewRandomWord = function() {
+  const bank = WORD_BANK[selectedLevel];
+  const word = bank[Math.floor(Math.random() * bank.length)];
+  previewedWord = word;
+  const preview = document.getElementById('random-preview');
+  document.getElementById('preview-word').textContent = word;
+  preview.classList.add('visible');
+};
+
+// 초기 미리보기 실행
+previewRandomWord();
 
 // ── GO HOME ──
 window.goHome = function() {
@@ -972,6 +1256,9 @@ window.fullResetGame = async function() {
   if (Object.keys(updates).length) await update(ref(db), updates);
   await set(ref(db, rp('round')), { state: 'idle' });
   document.getElementById('question-text').value = '';
+  selectedAnswerQ = '';
+  answerUsedQuestions.clear();
+  answerShownQuestions = [];
   showScreen('teacher');
 };
 
@@ -1089,7 +1376,18 @@ function listenAsTeacher() {
 
 // ── START ROUND ──
 window.startRound = async function() {
-  const q = document.getElementById('question-text').value.trim();
+  let q = '';
+  if (currentQtype === 'copy') {
+    if (currentInputMode === 'random') {
+      // 미리보기 단어가 있으면 사용, 없으면 새로 뽑기
+      if (!previewedWord) previewRandomWord();
+      q = previewedWord;
+    } else {
+      q = document.getElementById('question-text').value.trim();
+    }
+  } else {
+    q = document.getElementById('question-text-answer').value.trim();
+  }
   if (!q) { alert('문제를 입력해주세요!'); return; }
   await remove(ref(db, rp('submissions')));
   await remove(ref(db, rp('roundResult')));
@@ -1099,6 +1397,11 @@ window.startRound = async function() {
   Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   await set(ref(db, rp('round')), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
+  // 랜덤 모드이면 다음 라운드를 위해 미리보기 갱신
+  if (currentQtype === 'copy' && currentInputMode === 'random') {
+    previewedWord = '';
+    setTimeout(previewRandomWord, 300);
+  }
 };
 
 // ── ROUND RESULT ──
@@ -1246,9 +1549,21 @@ window.nextRound = async function() {
   Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
+  document.getElementById('question-text-answer').value = '';
+  selectedPresets.clear();
+  renderPresets();
+  document.getElementById('autogen-hint').textContent = '';
+  document.getElementById('preset-hint').textContent = '';
   document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
   renderedBubbleIds.clear();
+  // 답변하기: 이전에 출제된 질문 기록 후 새로 갱신
+  if (selectedAnswerQ) {
+    answerUsedQuestions.add(selectedAnswerQ);
+    selectedAnswerQ = '';
+  }
+  refreshAnswerQuestions(false); // 출제된 질문 제외 + 30% 교체
   showScreen('teacher');
+  if (currentQtype === 'answer') renderAnswerRandomBtns();
 };
 window.resetGame = window.nextRound;
 

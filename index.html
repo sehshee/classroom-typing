@@ -423,7 +423,57 @@
   .history-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; margin-bottom: 8px; font-size: 0.88rem; color: var(--text2); }
   .history-item strong { color: var(--text); }
 
-  /* ── UTIL ── */
+  /* ── AUTO GENERATE PANEL ── */
+  .autogen-section {
+    background: #f7f8fa; border: 1px solid rgba(0,0,0,0.07);
+    border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;
+  }
+  .autogen-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 0.7rem; }
+  .autogen-row:last-child { margin-bottom: 0; }
+  .autogen-label { font-size: 0.8rem; font-weight: 700; color: var(--text2); min-width: 48px; }
+  .level-btn, .count-btn {
+    padding: 5px 13px; border-radius: 99px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: #fff; color: var(--text2);
+    font-size: 0.82rem; font-family: inherit; cursor: pointer; transition: all .15s;
+  }
+  .level-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .count-btn.active { border-color: #2563eb; background: #2563eb; color: #fff; font-weight: 700; }
+  .count-custom-input {
+    width: 60px; padding: 4px 8px; border-radius: 99px;
+    border: 1.5px solid rgba(0,0,0,0.1); font-size: 0.82rem; font-family: inherit;
+    background: #fff; text-align: center; outline: none;
+  }
+  .count-custom-input:focus { border-color: #2563eb; }
+  .btn-autogen {
+    padding: 0.55rem 1.2rem;
+    background: transparent; border: 1.5px solid var(--accent);
+    border-radius: var(--radius-sm); color: var(--accent);
+    font-size: 0.85rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .btn-autogen:hover { background: var(--accent); color: #fff; }
+
+  /* ── ANSWER PRESET BUTTONS ── */
+  .answer-preset-section {
+    background: rgba(37,99,235,0.04); border: 1px solid rgba(37,99,235,0.12);
+    border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;
+  }
+  .answer-preset-label {
+    font-size: 0.78rem; font-weight: 700; color: #2563eb;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.7rem;
+  }
+  .preset-btns-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 0.8rem; }
+  .preset-btn {
+    padding: 6px 13px; border-radius: 99px;
+    border: 1.5px solid rgba(37,99,235,0.2);
+    background: #fff; color: #1d4ed8;
+    font-size: 0.82rem; font-family: inherit; cursor: pointer; transition: all .15s;
+  }
+  .preset-btn.selected {
+    border-color: #2563eb; background: #2563eb; color: #fff; font-weight: 700;
+  }
+  .preset-apply-row { display: flex; gap: 8px; align-items: center; }
   .hidden { display: none !important; }
   .mt { margin-top: 1rem; }
   .center { text-align: center; }
@@ -523,7 +573,46 @@
       <button class="qtype-btn qtype-btn-copy selected" id="qtype-copy" onclick="selectQtype('copy')">📝 따라쓰기</button>
       <button class="qtype-btn qtype-btn-answer" id="qtype-answer" onclick="selectQtype('answer')">💬 답변하기</button>
     </div>
-    <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 입력하세요..."></textarea>
+
+    <!-- ── 따라쓰기: 자동생성 패널 ── -->
+    <div id="copy-autogen-panel">
+      <div class="autogen-section">
+        <div class="autogen-row">
+          <span class="autogen-label">난이도</span>
+          <button class="level-btn active" data-level="1" onclick="selectLevel(1)">⭐ 기초</button>
+          <button class="level-btn" data-level="2" onclick="selectLevel(2)">⭐⭐ 중급</button>
+          <button class="level-btn" data-level="3" onclick="selectLevel(3)">⭐⭐⭐ 고급</button>
+        </div>
+        <div class="autogen-row">
+          <span class="autogen-label">갯수</span>
+          <button class="count-btn active" data-count="5" onclick="selectCount(5)">5개</button>
+          <button class="count-btn" data-count="10" onclick="selectCount(10)">10개</button>
+          <button class="count-btn" data-count="0" onclick="selectCount(0)">직접입력</button>
+          <input class="count-custom-input hidden" id="count-custom-input" type="number" min="1" max="30" placeholder="개수" />
+        </div>
+        <div class="autogen-row">
+          <button class="btn-autogen" onclick="generateWords()">🎲 자동 생성</button>
+          <span class="small" id="autogen-hint" style="color:var(--text2);"></span>
+        </div>
+      </div>
+      <textarea class="input-field" id="question-text" placeholder="문제 텍스트를 입력하거나 자동 생성하세요..."></textarea>
+    </div>
+
+    <!-- ── 답변하기: 예시 문제 선택 패널 ── -->
+    <div id="answer-preset-panel" class="hidden">
+      <div class="answer-preset-section">
+        <div class="answer-preset-label">💬 예시 문제 선택 (복수 선택 가능)</div>
+        <div class="preset-btns-wrap" id="preset-btns-wrap">
+          <!-- JS로 렌더링 -->
+        </div>
+        <div class="preset-apply-row">
+          <button class="btn-autogen" style="border-color:#2563eb;color:#2563eb;" onclick="applyPresets()">✅ 선택 문제 적용</button>
+          <span class="small" id="preset-hint" style="color:#2563eb;"></span>
+        </div>
+      </div>
+      <textarea class="input-field" id="question-text-answer" placeholder="선택하거나 직접 입력하세요..."></textarea>
+    </div>
+
     <div class="flex-row">
       <button class="btn-primary grow" onclick="startRound()">▶ 게임 시작</button>
     </div>
@@ -938,7 +1027,131 @@ window.selectQtype = function(qt) {
   currentQtype = qt;
   document.getElementById('qtype-copy').classList.toggle('selected', qt === 'copy');
   document.getElementById('qtype-answer').classList.toggle('selected', qt === 'answer');
+  document.getElementById('copy-autogen-panel').classList.toggle('hidden', qt !== 'copy');
+  document.getElementById('answer-preset-panel').classList.toggle('hidden', qt !== 'answer');
 };
+
+// ── 난이도별 단어 데이터 ──
+const WORD_BANK = {
+  // 기초: 받침 없는 기본자리 단어 (ㄱㄴㄷㄹ + 기본 모음)
+  1: [
+    '가','나','다','라','마','바','사','아','자','카','타','파','하',
+    '가나','나비','다리','바다','사자','아이','자기','우리','아기','오리',
+    '가게','나무','도로','바보','사이','오이','우유','이마','자리','허리',
+    '가로','나라','도시','바지','사과','오리','우리나라','아버지','어머니',
+    '누나','오빠','고기','구두','기도','나이','다음','모래','부부','시소',
+    '아파','오래','이미','하마','호수','거미','도마','두부','무기','비가',
+  ],
+  // 중급: 받침 있는 단어 (복잡한 받침 없음)
+  2: [
+    '강','달','말','발','산','손','눈','귀','입','팔',
+    '감기','공부','날씨','동물','마음','방법','선물','일기','전화','학교',
+    '건강','고민','그림','남자','노래','독서','문제','반칙','봄날','색깔',
+    '여름','운동','작품','집중','친구','태양','한국','행복','호랑이','화분',
+    '강아지','고양이','도서관','목소리','박수치','선생님','어린이','용기있','자연환','초등학',
+    '가방들','날개달','달리기','동생과','모험심','반짝임','빛나는','사랑해','여행가','웃음꽃',
+  ],
+  // 고급: 된소리(shift), 쌍자음, 복잡한 받침 포함
+  3: [
+    '까다','뚜껑','빠르','쏘다','짜다','꼭꼭','딱딱','빽빽','쑥쑥','찍찍',
+    '꽃잎','닭볶','떡볶','뽑기','쌍둥','찹쌀','빠짐','쏟아','꽤나','쩔어',
+    '까불지','꼼꼼히','뚝딱뚝','빠릿빠','쏴버려','짜릿한','꽃봉오','닭다리','떡국을','뽀로로',
+    '가끔씩','깜짝놀','꿈꾸며','끝까지','날뛰지','넘어져','뒤집어','뛰어올','때로는','또래들',
+    '빠져들','뾰족한','쌩쌩달','쏘아올','씩씩하','씹어먹','짬뽕먹','쪽빛하','찌릿찌','쭉뻗어',
+  ],
+};
+
+let selectedLevel = 1;
+let selectedCount = 5;
+
+window.selectLevel = function(lv) {
+  selectedLevel = lv;
+  document.querySelectorAll('.level-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.level === lv);
+  });
+};
+
+window.selectCount = function(n) {
+  selectedCount = n;
+  document.querySelectorAll('.count-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.count === n);
+  });
+  const ci = document.getElementById('count-custom-input');
+  if (n === 0) { ci.classList.remove('hidden'); ci.focus(); }
+  else { ci.classList.add('hidden'); }
+};
+
+window.generateWords = function() {
+  const bank = WORD_BANK[selectedLevel];
+  let count = selectedCount;
+  if (count === 0) {
+    count = parseInt(document.getElementById('count-custom-input').value) || 5;
+  }
+  count = Math.min(count, 30);
+  // 중복 없이 랜덤 뽑기
+  const shuffled = [...bank].sort(() => Math.random() - 0.5);
+  const picked = shuffled.slice(0, Math.min(count, shuffled.length));
+  // 부족하면 반복 보충
+  while (picked.length < count) {
+    picked.push(...shuffled.slice(0, count - picked.length));
+  }
+  document.getElementById('question-text').value = picked.join(' ');
+  document.getElementById('autogen-hint').textContent =
+    `${picked.length}개 단어 생성됨 · 직접 수정 가능`;
+};
+
+// ── 답변하기 예시 문제 ──
+const ANSWER_PRESETS = [
+  '당신의 이름은 무엇입니까?',
+  '좋아하는 계절은 무엇인가요?',
+  '좋아하는 색깔은 무엇인가요?',
+  '좋아하는 과일은 무엇인가요?',
+  '나의 최애는 누구인가요?',
+  '오늘 기분이 어떤가요?',
+  '가장 좋아하는 음식은?',
+  '방학에 가고 싶은 곳은?',
+  '내가 가장 잘하는 것은?',
+  '지금 가장 하고 싶은 것은?',
+  '기타 (직접 입력)',
+];
+let selectedPresets = new Set();
+
+function renderPresets() {
+  const wrap = document.getElementById('preset-btns-wrap');
+  wrap.innerHTML = '';
+  ANSWER_PRESETS.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (selectedPresets.has(i) ? ' selected' : '');
+    btn.textContent = q;
+    btn.onclick = () => togglePreset(i, btn, q);
+    wrap.appendChild(btn);
+  });
+}
+
+function togglePreset(i, btn, q) {
+  if (i === ANSWER_PRESETS.length - 1) {
+    // 기타: 직접 입력 포커스
+    document.getElementById('question-text-answer').focus();
+    return;
+  }
+  if (selectedPresets.has(i)) { selectedPresets.delete(i); btn.classList.remove('selected'); }
+  else { selectedPresets.add(i); btn.classList.add('selected'); }
+  document.getElementById('preset-hint').textContent =
+    selectedPresets.size > 0 ? `${selectedPresets.size}개 선택됨` : '';
+}
+
+window.applyPresets = function() {
+  const questions = [...selectedPresets].map(i => ANSWER_PRESETS[i]);
+  if (questions.length === 0) {
+    document.getElementById('preset-hint').textContent = '문제를 선택해주세요!';
+    return;
+  }
+  document.getElementById('question-text-answer').value = questions.join('\n');
+  document.getElementById('preset-hint').textContent = `${questions.length}개 문제 적용됨 · 직접 수정 가능`;
+};
+
+// 초기 프리셋 렌더링
+renderPresets();
 
 // ── GO HOME ──
 window.goHome = function() {
@@ -1089,7 +1302,9 @@ function listenAsTeacher() {
 
 // ── START ROUND ──
 window.startRound = async function() {
-  const q = document.getElementById('question-text').value.trim();
+  const q = currentQtype === 'copy'
+    ? document.getElementById('question-text').value.trim()
+    : document.getElementById('question-text-answer').value.trim();
   if (!q) { alert('문제를 입력해주세요!'); return; }
   await remove(ref(db, rp('submissions')));
   await remove(ref(db, rp('roundResult')));
@@ -1246,6 +1461,11 @@ window.nextRound = async function() {
   Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
+  document.getElementById('question-text-answer').value = '';
+  selectedPresets.clear();
+  renderPresets();
+  document.getElementById('autogen-hint').textContent = '';
+  document.getElementById('preset-hint').textContent = '';
   document.getElementById('screen-live').querySelectorAll('.float-bubble').forEach(b => b.remove());
   renderedBubbleIds.clear();
   showScreen('teacher');

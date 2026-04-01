@@ -311,13 +311,12 @@
     border-bottom: 1px solid rgba(0,0,0,0.07); flex-wrap: wrap; gap: 0.8rem;
   }
   .live-question-box {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 20; text-align: center; padding: 2rem 3rem;
-    max-width: 700px; width: 90%; pointer-events: none;
-    background: rgba(247,248,250,0.82); backdrop-filter: blur(10px);
-    border-radius: 24px; border: 1.5px solid rgba(233,69,96,0.15);
-    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+    position: sticky; top: 0;
+    z-index: 20; text-align: center; padding: 1rem 2rem;
+    width: 100%;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+    border-bottom: 1.5px solid rgba(233,69,96,0.18);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
   }
   .live-question-label {
     font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
@@ -1004,7 +1003,12 @@ function listenAsTeacher() {
 
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
-    const headerH = 72;
+
+    // Measure actual occupied height at top (header + question box)
+    const liveHeader = document.querySelector('.live-header');
+    const liveQBox   = document.getElementById('live-question-box');
+    const headerH = (liveHeader ? liveHeader.offsetHeight : 72)
+                  + (liveQBox   ? liveQBox.offsetHeight   : 80);
     const PAD = 12;
 
     // Remove old bubbles and re-layout all from scratch each time

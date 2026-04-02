@@ -903,7 +903,8 @@ function getColor(uid) {
 }
 
 // ── ROOM PATH HELPER ──
-function rp(path) { return `rooms/${roomCode}/${path}`; }
+const APP_ROOT = 'apps/classroom-typing';
+function rp(path) { return `${APP_ROOT}/rooms/${roomCode}/${path}`; }
 
 // ── HELPERS ──
 window.showScreen = function(id) {
@@ -1022,14 +1023,14 @@ window.createRoom = async function() {
   let code, exists = true;
   while (exists) {
     code = genRoomCode();
-    const snap = await get(ref(db, `rooms/${code}`));
+    const snap = await get(ref(db, `${APP_ROOT}/rooms/${code}`));
     exists = snap.exists();
   }
 
   roomCode = code;
   myName = name; myId = 'teacher';
 
-  await set(ref(db, `rooms/${roomCode}`), {
+  await set(ref(db, `${APP_ROOT}/rooms/${roomCode}`), {
     meta: { name: roomName, createdAt: Date.now(), teacherName: name },
     teacher: { name, online: true },
     round: { state: 'idle' }
@@ -1047,7 +1048,7 @@ window.enterExistingRoom = async function() {
   if (code.length !== 6) { errEl.textContent = '6자리 방 코드를 입력해주세요.'; return; }
   if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
 
-  const snap = await get(ref(db, `rooms/${code}`));
+  const snap = await get(ref(db, `${APP_ROOT}/rooms/${code}`));
   if (!snap.exists()) { errEl.textContent = '존재하지 않는 방 코드입니다.'; return; }
   const room = snap.val();
 
@@ -1074,7 +1075,7 @@ window.joinRoom = async function() {
   if (code.length !== 6) { errEl.textContent = '6자리 방 코드를 입력해주세요.'; return; }
   if (!name) { errEl.textContent = '이름을 입력해주세요.'; return; }
 
-  const snap = await get(ref(db, `rooms/${code}`));
+  const snap = await get(ref(db, `${APP_ROOT}/rooms/${code}`));
   if (!snap.exists()) { errEl.textContent = '존재하지 않는 방 코드입니다.'; return; }
   const room = snap.val();
 
@@ -1307,7 +1308,7 @@ window.deleteRoom = async function() {
   if (!confirm('⚠️ 방을 삭제하면 모든 데이터(학생, 점수, 기록)가 영구 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
   const deletedCode = roomCode;
   roomCode = ''; myName = ''; myId = ''; myRole = '';
-  await remove(ref(db, `rooms/${deletedCode}`));
+  await remove(ref(db, `${APP_ROOT}/rooms/${deletedCode}`));
   // URL을 기본 주소로 초기화
   window.history.replaceState({}, '', 'https://sehshee.github.io/classroom-typing');
   showScreen('home');
@@ -1323,7 +1324,7 @@ window.fullResetGame = async function() {
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
+  Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   await set(ref(db, rp('round')), { state: 'idle' });
   document.getElementById('question-text').value = '';
@@ -1465,7 +1466,7 @@ window.startRound = async function() {
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
+  Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   await set(ref(db, rp('round')), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
   // 랜덤 모드이면 다음 라운드를 위해 미리보기 갱신
@@ -1700,7 +1701,7 @@ window.nextRound = async function() {
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
   const updates = {};
-  Object.keys(students).forEach(id => { updates[`rooms/${roomCode}/students/${id}/done`] = false; });
+  Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   document.getElementById('question-text').value = '';
   document.getElementById('question-text-answer').value = '';
@@ -1724,7 +1725,7 @@ window.resetGame = window.nextRound;
 // ── STUDENT LISTENERS ──
 function listenAsStudent() {
   // 방 삭제 감지 — rooms/{code} 자체가 사라지면 학생을 코드 입력 화면으로 내보냄
-  onValue(ref(db, `rooms/${roomCode}`), snap => {
+  onValue(ref(db, `${APP_ROOT}/rooms/${roomCode}`), snap => {
     if (!snap.exists()) {
       stopTimer();
       roundActive = false;

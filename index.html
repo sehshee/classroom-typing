@@ -904,7 +904,37 @@ function getColor(uid) {
 
 // ── ROOM PATH HELPER ──
 const APP_ROOT = 'apps/classroom-typing';
+const MAX_ACTIVE_ROOMS   = 5;
+const ROOM_EXPIRE_MS     = 24 * 60 * 60 * 1000;  // 24시간
+const ROOM_IDLE_MS       = 2  * 60 * 60 * 1000;  // 마지막 활동 후 2시간
 function rp(path) { return `${APP_ROOT}/rooms/${roomCode}/${path}`; }
+
+// ── 만료 방 정리 + 활성 방 수 반환 ──
+async function cleanupAndCountRooms() {
+  const snap = await get(ref(db, `${APP_ROOT}/rooms`));
+  if (!snap.exists()) return 0;
+
+  const now = Date.now();
+  const rooms = snap.val();
+  const deletions = [];
+  let activeCount = 0;
+
+  Object.entries(rooms).forEach(([code, room]) => {
+    const createdAt     = room.meta?.createdAt    || 0;
+    const lastActiveAt  = room.meta?.lastActiveAt || createdAt;
+    const tooOld        = (now - createdAt)    > ROOM_EXPIRE_MS;
+    const tooIdle       = (now - lastActiveAt) > ROOM_IDLE_MS;
+
+    if (tooOld || tooIdle) {
+      deletions.push(remove(ref(db, `${APP_ROOT}/rooms/${code}`)));
+    } else {
+      activeCount++;
+    }
+  });
+
+  await Promise.all(deletions);
+  return activeCount;
+}
 
 // ── HELPERS ──
 window.showScreen = function(id) {
@@ -1020,6 +1050,15 @@ window.createRoom = async function() {
   if (!name)     { errEl.textContent = '선생님 이름을 입력해주세요.'; return; }
   if (!roomName) { errEl.textContent = '방 이름을 입력해주세요.'; return; }
 
+  // 만료된 방 정리 후 활성 방 수 확인
+  errEl.textContent = '확인 중...';
+  const activeCount = await cleanupAndCountRooms();
+  if (activeCount >= MAX_ACTIVE_ROOMS) {
+    errEl.textContent = `⚠ 현재 동시 수업이 많아 방을 만들 수 없습니다. 잠시 후 다시 시도해주세요. (활성 방 ${activeCount}/${MAX_ACTIVE_ROOMS})`;
+    return;
+  }
+  errEl.textContent = '';
+
   let code, exists = true;
   while (exists) {
     code = genRoomCode();
@@ -1030,8 +1069,9 @@ window.createRoom = async function() {
   roomCode = code;
   myName = name; myId = 'teacher';
 
+  const now = Date.now();
   await set(ref(db, `${APP_ROOT}/rooms/${roomCode}`), {
-    meta: { name: roomName, createdAt: Date.now(), teacherName: name },
+    meta: { name: roomName, createdAt: now, lastActiveAt: now, teacherName: name },
     teacher: { name, online: true },
     round: { state: 'idle' }
   });
@@ -1469,6 +1509,8 @@ window.startRound = async function() {
   Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
   if (Object.keys(updates).length) await update(ref(db), updates);
   await set(ref(db, rp('round')), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
+  // 활동 시간 갱신 (방 만료 방지)
+  await update(ref(db, `${APP_ROOT}/rooms/${roomCode}/meta`), { lastActiveAt: Date.now() });
   // 랜덤 모드이면 다음 라운드를 위해 미리보기 갱신
   if (currentQtype === 'copy' && currentInputMode === 'random') {
     previewedWord = '';

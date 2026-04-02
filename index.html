@@ -548,7 +548,7 @@
     <div class="app-title">⌨️ 타자 교실</div>
     <div class="app-sub">실시간 교실 타자 게임</div>
     <div class="entry-btns">
-      <button class="entry-btn entry-btn-teacher" onclick="showScreen('teacher-setup')">
+      <button class="entry-btn entry-btn-teacher" onclick="openTeacherSetup()">
         👩‍🏫 선생님으로 시작
       </button>
       <button class="entry-btn entry-btn-student" onclick="showScreen('student-join')">
@@ -580,6 +580,10 @@
 
     <!-- 기존 방 입장 -->
     <div id="tab-enter-content" class="hidden">
+      <div id="last-room-hint" style="display:none;background:rgba(37,99,235,0.06);border:1.5px solid rgba(37,99,235,0.2);border-radius:var(--radius-sm);padding:0.7rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#1d4ed8;">
+        <div style="font-weight:700;margin-bottom:2px;">🕐 마지막 수업</div>
+        <div id="last-room-info" style="color:var(--text2);"></div>
+      </div>
       <input class="input-field code-input" id="enter-room-code" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase()" />
       <input class="input-field" id="enter-name" placeholder="선생님 이름" maxlength="12" />
       <button class="btn-primary" onclick="enterExistingRoom()">입장하기</button>
@@ -955,11 +959,72 @@ function genRoomCode() {
 }
 
 // ── TAB SWITCH ──
+// ── OPEN TEACHER SETUP ──
+window.openTeacherSetup = function() {
+  showScreen('teacher-setup');
+  // 마지막 방이 있으면 기존 방 입장 탭으로 (Firebase 확인은 switchTab 내부에서)
+  const last = loadLastRoom();
+  switchTab(last ? 'enter' : 'create');
+};
+
+// ── LAST ROOM (localStorage) ──
+function saveLastRoom(code, name, roomName) {
+  try {
+    localStorage.setItem('ct_last_room', JSON.stringify({ code, name, roomName, savedAt: Date.now() }));
+  } catch(e) {}
+}
+function loadLastRoom() {
+  try {
+    const raw = localStorage.getItem('ct_last_room');
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+function clearLastRoom() {
+  try { localStorage.removeItem('ct_last_room'); } catch(e) {}
+}
+
 window.switchTab = function(tab) {
   document.getElementById('tab-create').classList.toggle('active', tab === 'create');
   document.getElementById('tab-enter').classList.toggle('active', tab === 'enter');
   document.getElementById('tab-create-content').classList.toggle('hidden', tab !== 'create');
   document.getElementById('tab-enter-content').classList.toggle('hidden', tab !== 'enter');
+
+  // 기존 방 입장 탭 열릴 때 마지막 방 정보 자동 채우기
+  if (tab === 'enter') {
+    const last = loadLastRoom();
+    const hintEl = document.getElementById('last-room-hint');
+    const infoEl = document.getElementById('last-room-info');
+    if (last) {
+      // Firebase에 방이 실제로 존재하는지 확인
+      hintEl.style.display = '';
+      infoEl.textContent = '이전 수업 방 확인 중...';
+      get(ref(db, `${APP_ROOT}/rooms/${last.code}`)).then(snap => {
+        if (snap.exists()) {
+          // 방 존재 → 자동 채우기
+          document.getElementById('enter-room-code').value = last.code;
+          document.getElementById('enter-name').value = last.name;
+          const elapsed = Math.floor((Date.now() - last.savedAt) / 60000);
+          const timeStr = elapsed < 60
+            ? `${elapsed}분 전`
+            : `${Math.floor(elapsed / 60)}시간 ${elapsed % 60}분 전`;
+          infoEl.textContent = `${last.roomName || last.code} · ${last.code} · ${timeStr}`;
+        } else {
+          // 방 없음 → localStorage 초기화 후 새 방 만들기 탭으로
+          clearLastRoom();
+          hintEl.style.display = 'none';
+          switchTab('create');
+        }
+      }).catch(() => {
+        // 네트워크 오류 등 → 일단 채워두기
+        document.getElementById('enter-room-code').value = last.code;
+        document.getElementById('enter-name').value = last.name;
+        hintEl.style.display = '';
+        infoEl.textContent = `${last.roomName || last.code} · ${last.code}`;
+      });
+    } else {
+      hintEl.style.display = 'none';
+    }
+  }
 };
 
 // ── QR MODAL ──
@@ -1076,6 +1141,7 @@ window.createRoom = async function() {
     round: { state: 'idle' }
   });
 
+  saveLastRoom(roomCode, name, roomName);
   initTeacherDashboard();
 };
 
@@ -1098,11 +1164,12 @@ window.enterExistingRoom = async function() {
   roomCode = code;
   myName = name; myId = 'teacher';
 
-  await remove(ref(db, rp('students')));
+  // 학생 데이터는 유지 (재입장 시 학생들이 그대로 보이도록)
   await remove(ref(db, rp('submissions')));
   await set(ref(db, rp('round')), { state: 'idle' });
   await set(ref(db, rp('teacher')), { name, online: true });
 
+  saveLastRoom(code, name, room.meta?.name || code);
   initTeacherDashboard();
 };
 
@@ -1349,7 +1416,7 @@ window.deleteRoom = async function() {
   const deletedCode = roomCode;
   roomCode = ''; myName = ''; myId = ''; myRole = '';
   await remove(ref(db, `${APP_ROOT}/rooms/${deletedCode}`));
-  // URL을 기본 주소로 초기화
+  clearLastRoom();
   window.history.replaceState({}, '', 'https://sehshee.github.io/classroom-typing');
   showScreen('home');
 };

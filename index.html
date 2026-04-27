@@ -872,6 +872,12 @@ let startTime = null;
 let roundActive = false;
 let prevScreen = 'result';
 let renderedBubbleIds = new Set();
+// onValue 리스너 해제 함수 목록 (R-19-3)
+let _unsubs = [];
+function _unsubscribeAll() {
+  _unsubs.forEach(fn => fn());
+  _unsubs = [];
+}
 
 const BUBBLE_COLORS = [
   { bg: 'rgba(233,69,96,0.12)',   border: '#e94560', text: '#c0283e' },
@@ -1406,6 +1412,8 @@ previewRandomWord();
 // ── GO HOME ──
 window.goHome = function() {
   if (!confirm('현재 수업을 종료하고 홈으로 돌아가시겠습니까?\n(방은 삭제되지 않습니다)')) return;
+  _unsubscribeAll(); // R-19-3: 리스너 해제
+  stopTimer();
   roomCode = ''; myName = ''; myId = ''; myRole = '';
   showScreen('home');
 };
@@ -1413,6 +1421,8 @@ window.goHome = function() {
 // ── DELETE ROOM ──
 window.deleteRoom = async function() {
   if (!confirm('⚠️ 방을 삭제하면 모든 데이터(학생, 점수, 기록)가 영구 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
+  _unsubscribeAll(); // R-19-3: 리스너 해제
+  stopTimer();
   const deletedCode = roomCode;
   roomCode = ''; myName = ''; myId = ''; myRole = '';
   await remove(ref(db, `${APP_ROOT}/rooms/${deletedCode}`));
@@ -1424,15 +1434,17 @@ window.deleteRoom = async function() {
 // ── FULL RESET ──
 window.fullResetGame = async function() {
   if (!confirm('⚠️ 모든 점수, 기록, 순위를 삭제하고 새 게임을 시작할까요?')) return;
-  await remove(ref(db, rp('submissions')));
-  await remove(ref(db, rp('roundResult')));
-  await remove(ref(db, rp('history')));
-  await remove(ref(db, rp('scores')));
+  // R-19-4: 연관 삭제는 단일 update(null) 패턴으로 일괄 처리
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
-  const updates = {};
+  const updates = {
+    [`${APP_ROOT}/rooms/${roomCode}/submissions`]: null,
+    [`${APP_ROOT}/rooms/${roomCode}/roundResult`]: null,
+    [`${APP_ROOT}/rooms/${roomCode}/history`]: null,
+    [`${APP_ROOT}/rooms/${roomCode}/scores`]: null,
+  };
   Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
-  if (Object.keys(updates).length) await update(ref(db), updates);
+  await update(ref(db), updates);
   await set(ref(db, rp('round')), { state: 'idle' });
   document.getElementById('question-text').value = '';
   selectedAnswerQ = '';
@@ -1443,7 +1455,7 @@ window.fullResetGame = async function() {
 
 // ── TEACHER LISTENERS ──
 function listenAsTeacher() {
-  onValue(ref(db, rp('students')), snap => {
+  _unsubs.push(onValue(ref(db, rp('students')), snap => {
     const students = snap.val() || {};
     const list = document.getElementById('students-list');
     list.innerHTML = '';
@@ -1461,9 +1473,9 @@ function listenAsTeacher() {
     document.getElementById('live-student-badge').textContent = '학생 ' + count + '명';
     const noticeLive = document.getElementById('all-submitted-notice-live');
     if (noticeLive) noticeLive.style.display = (count > 0 && doneCount === count) ? '' : 'none';
-  });
+  }));
 
-  onValue(ref(db, rp('submissions')), snap => {
+  _unsubs.push(onValue(ref(db, rp('submissions')), snap => {
     const subs = snap.val() || {};
     const entries = Object.values(subs);
     const liveScreen = document.getElementById('screen-live');
@@ -1532,9 +1544,9 @@ function listenAsTeacher() {
       liveScreen.appendChild(div);
     });
     renderedBubbleIds = new Set(entries.map(e => e.uid));
-  });
+  }));
 
-  onValue(ref(db, rp('round')), snap => {
+  _unsubs.push(onValue(ref(db, rp('round')), snap => {
     const round = snap.val();
     if (!round) return;
     if (round.state === 'active') {
@@ -1550,7 +1562,7 @@ function listenAsTeacher() {
       renderedBubbleIds.clear();
       showScreen('teacher');
     }
-  });
+  }));
 }
 
 // ── START ROUND ──
@@ -1568,13 +1580,15 @@ window.startRound = async function() {
     q = document.getElementById('question-text-answer').value.trim();
   }
   if (!q) { alert('문제를 입력해주세요!'); return; }
-  await remove(ref(db, rp('submissions')));
-  await remove(ref(db, rp('roundResult')));
+  // R-19-4: 연관 삭제는 단일 update(null) 패턴으로 일괄 처리
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
-  const updates = {};
+  const updates = {
+    [`${APP_ROOT}/rooms/${roomCode}/submissions`]: null,
+    [`${APP_ROOT}/rooms/${roomCode}/roundResult`]: null,
+  };
   Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
-  if (Object.keys(updates).length) await update(ref(db), updates);
+  await update(ref(db), updates);
   await set(ref(db, rp('round')), { question: q, qtype: currentQtype, state: 'active', startedAt: Date.now() });
   // 활동 시간 갱신 (방 만료 방지)
   await update(ref(db, `${APP_ROOT}/rooms/${roomCode}/meta`), { lastActiveAt: Date.now() });
@@ -1804,14 +1818,16 @@ function avRender() {
 
 // ── NEXT ROUND ──
 window.nextRound = async function() {
-  await set(ref(db, rp('round')), { state: 'idle' });
-  await remove(ref(db, rp('submissions')));
-  await remove(ref(db, rp('roundResult')));
+  // R-19-4: 연관 삭제 + 학생 done 초기화를 단일 update로 일괄 처리
   const snap = await get(ref(db, rp('students')));
   const students = snap.val() || {};
-  const updates = {};
+  const updates = {
+    [`${APP_ROOT}/rooms/${roomCode}/round`]: { state: 'idle' },
+    [`${APP_ROOT}/rooms/${roomCode}/submissions`]: null,
+    [`${APP_ROOT}/rooms/${roomCode}/roundResult`]: null,
+  };
   Object.keys(students).forEach(id => { updates[`${APP_ROOT}/rooms/${roomCode}/students/${id}/done`] = false; });
-  if (Object.keys(updates).length) await update(ref(db), updates);
+  await update(ref(db), updates);
   document.getElementById('question-text').value = '';
   document.getElementById('question-text-answer').value = '';
   selectedPresets.clear();
@@ -1834,8 +1850,9 @@ window.resetGame = window.nextRound;
 // ── STUDENT LISTENERS ──
 function listenAsStudent() {
   // 방 삭제 감지 — rooms/{code} 자체가 사라지면 학생을 코드 입력 화면으로 내보냄
-  onValue(ref(db, `${APP_ROOT}/rooms/${roomCode}`), snap => {
+  _unsubs.push(onValue(ref(db, `${APP_ROOT}/rooms/${roomCode}`), snap => {
     if (!snap.exists()) {
+      _unsubscribeAll(); // R-19-3: 방 삭제 감지 즉시 모든 리스너 해제
       stopTimer();
       roundActive = false;
       myName = ''; myId = ''; roomCode = ''; myRole = '';
@@ -1847,8 +1864,8 @@ function listenAsStudent() {
       document.getElementById('student-join-error').textContent = '선생님이 방을 삭제했습니다.';
       showScreen('student-join');
     }
-  });
-  onValue(ref(db, rp('round')), snap => {
+  }));
+  _unsubs.push(onValue(ref(db, rp('round')), snap => {
     const round = snap.val();
     if (!round || round.state !== 'active') {
       if (!round || round.state === 'idle') {
@@ -1882,13 +1899,13 @@ function listenAsStudent() {
       startTime = Date.now();
       startTimer();
     }
-  });
+  }));
 
-  onValue(ref(db, rp('roundResult')), snap => {
+  _unsubs.push(onValue(ref(db, rp('roundResult')), snap => {
     const result = snap.val();
     if (!result || !result.entries) return;
     showStudentResult(result.entries, result.qtype);
-  });
+  }));
 }
 
 function showStudentResult(entries, qtype) {
